@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+model Usuario {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  nome         String
+  cpf          String    @unique
+  email        String    @unique
+  telefone     String
+  senha        String
+  dataCriacao  DateTime?
+  tipoUsuario  String
+  statusConta  String
+  mesas        Mesa[]        // Relacionamento: 1 usuario pode ter várias mesas
+  pedidos      Pedido[]      // Relacionamento: 1 usuario pode fazer vários pedidos
+}
+
+model Mesa {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  numero       Int
+  status       String
+  capacidade   Int
+  localizacao  String
+  usuarioId    String    @db.ObjectId
+  usuario      Usuario   @relation(fields: [usuarioId], references: [id])
+  dataCriacao  DateTime?
+  pedidos      Pedido[]
+}
+
+model Pedido {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  mesaId       String     @db.ObjectId
+  mesa         Mesa       @relation(fields: [mesaId], references: [id])
+  usuarioId    String     @db.ObjectId
+  usuario      Usuario    @relation(fields: [usuarioId], references: [id])
+  garcomId     String?    @db.ObjectId
+  garcom       Garcom?    @relation(fields: [garcomId], references: [id])
+  itens        ItemPedido[]
+  status       String
+  dataHora     DateTime
+  total        Float
+  pagamentos   Pagamento[]
+}
+
+model ItemPedido {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  pedidoId       String    @db.ObjectId
+  pedido         Pedido    @relation(fields: [pedidoId], references: [id])
+  produtoId      String    @db.ObjectId
+  produto        Produto   @relation(fields: [produtoId], references: [id])
+  quantidade     Int
+  precoUnitario  Float
+  observacao     String
+  subtotal       Float
+}
+
+model Produto {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  nome          String
+  descricao     String
+  preco         Float
+  categoria     String
+  disponivel    Boolean
+  tempoPreparo  Int
+  imagemUrl     String
+  itensPedido   ItemPedido[] // Relacionamento reverso
+}
+
+model Garcom {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  nome      String
+  turno     String
+  ativo     Boolean
+  pedidos   Pedido[]
+}
+
+model Pagamento {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  pedidoId   String    @db.ObjectId
+  pedido     Pedido    @relation(fields: [pedidoId], references: [id])
+  metodo     String
+  valor      Float
+  dataHora   DateTime
+  status     String
+}
