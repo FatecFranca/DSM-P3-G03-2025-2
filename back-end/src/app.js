@@ -15,4 +15,22 @@ app.use(cookieParser())
 app.use('/', indexRouter)
 app.use('/users', usersRouter)
 
+
+//-------------- ROTAS ---------  //
+
+import usuariosRouter from './routes/usuarios.js'
+app.use('/usuarios' , usuariosRouter)
+
+import mesasRouter from './routes/mesas.js'
+app.use('mesas' , mesasRouter)
+
+import pedidosRouter from './routes/pedidos.js'
+app.use('/pedidos' , pedidosRouter)
+
+import produtosRouter from './routes/produtos.js'
+app.use('/produtos' , produtosRouter)
+
+import garcomRouter from './routes/garcom.js'
+app.use('/garcom' , garcomRouter)
+
 export default app
