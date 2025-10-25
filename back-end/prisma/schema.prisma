@@ -14,86 +14,121 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Nomes de model no Prisma devem estar
+// no singular e iniciar com LetraMaiúscula
+model Categoria {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  descricao   String
+  produtos    Produto[]
+}
 
-model Usuario {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
-  nome         String
-  cpf          String    @unique
-  email        String    @unique
-  telefone     String
-  senha        String
-  dataCriacao  DateTime?
-  tipoUsuario  String
-  statusConta  String
-  mesas        Mesa[]        // Relacionamento: 1 usuario pode ter várias mesas
-  pedidos      Pedido[]      // Relacionamento: 1 usuario pode fazer vários pedidos
+model Cliente {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  nome              String
+  cpf               String    @unique     // Não pode se repetir na coleção
+  data_nascimento   DateTime? // opcional
+  email             String    @unique
+  logradouro        String    
+  num_imovel        String
+  complemento       String?   // opcional
+  bairro            String
+  municipio         String
+  uf                String
+  cep               String
+  celular           String
+  mesa              Mesa[]
 }
 
 model Mesa {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
-  numero       Int
-  status       String
-  capacidade   Int
-  localizacao  String
-  usuarioId    String    @db.ObjectId
-  usuario      Usuario   @relation(fields: [usuarioId], references: [id])
-  dataCriacao  DateTime?
-  pedidos      Pedido[]
+  id                String        @id @default(auto()) @map("_id") @db.ObjectId
+  numero            Int           @unique
+  capacidade        Int
+  status            String
+  cliente_id        String       @db.ObjectId
+  cliente           Cliente       @relation(fields: [cliente_id], references: [id])
+  pedidos           Pedido[]
+  data_reserva    DateTime?
 }
 
 model Pedido {
-  id           String     @id @default(auto()) @map("_id") @db.ObjectId
-  mesaId       String     @db.ObjectId
-  mesa         Mesa       @relation(fields: [mesaId], references: [id])
-  usuarioId    String     @db.ObjectId
-  usuario      Usuario    @relation(fields: [usuarioId], references: [id])
-  garcomId     String?    @db.ObjectId
-  garcom       Garcom?    @relation(fields: [garcomId], references: [id])
-  itens        ItemPedido[]
-  status       String
-  dataHora     DateTime
-  total        Float
-  pagamentos   Pagamento[]
+  id                String        @id @default(auto()) @map("_id") @db.ObjectId
+  num_pedido        Int           @unique
+  data_hora         DateTime      @default(now())
+  mesa_id           String        @db.ObjectId
+  mesa              Mesa          @relation(fields: [mesa_id], references: [id])
+  itens             ItemPedido[]
+  garcom      Garcom[]  @relation(fields: [garcom_ids], references: [id])
+  garcom_ids    String[]      @db.ObjectId
 }
 
-model ItemPedido {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
-  pedidoId       String    @db.ObjectId
-  pedido         Pedido    @relation(fields: [pedidoId], references: [id])
-  produtoId      String    @db.ObjectId
-  produto        Produto   @relation(fields: [produtoId], references: [id])
-  quantidade     Int
-  precoUnitario  Float
-  observacao     String
-  subtotal       Float
-}
+ model ItemPedido {
+  id                String        @id @default(auto()) @map("_id") @db.ObjectId
+  num_item          Int
+  quantidade        Float
+  produto_id        String        @db.ObjectId
+  produto           Produto       @relation(fields: [produto_id], references: [id])
+  pedido_id         String        @db.ObjectId
+  pedido            Pedido        @relation(fields: [pedido_id], references: [id])
 
-model Produto {
-  id            String       @id @default(auto()) @map("_id") @db.ObjectId
-  nome          String
-  descricao     String
-  preco         Float
-  categoria     String
-  disponivel    Boolean
-  tempoPreparo  Int
-  imagemUrl     String
-  itensPedido   ItemPedido[] // Relacionamento reverso
+  // Índice único nos campos pedido_id e num_item para impedir
+  // a repetição do número do item dentro do mesmo pedido
+  @@unique([pedido_id, num_item])
 }
 
 model Garcom {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  nome      String
-  turno     String
-  ativo     Boolean
-  pedidos   Pedido[]
+  id                String        @id @default(auto()) @map("_id") @db.ObjectId
+  nome              String
+  cpf               String        @unique
+  email             String        @unique
+  celular           String
+  turno             String
+  ativo            Boolean       @default(true)
+  pedidos          Pedido[]     @relation(fields: [pedido_ids], references: [id])
+  pedido_ids       String[]      @db.ObjectId
 }
 
-model Pagamento {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  pedidoId   String    @db.ObjectId
-  pedido     Pedido    @relation(fields: [pedidoId], references: [id])
-  metodo     String
-  valor      Float
-  dataHora   DateTime
-  status     String
+
+model Produto {
+  id                String        @id @default(auto()) @map("_id") @db.ObjectId
+  nome              String
+  marca             String
+  detalhes          String?
+  quantidade        Float
+  unidade_medida    String
+  preco_unitario    Float
+  qtd_estoque       Float
+  categoria_id      String        @db.ObjectId
+  categoria         Categoria     @relation(fields: [categoria_id], references: [id])
+  fornecedores      Fornecedor[]  @relation(fields: [fornecedor_ids], references: [id])
+  fornecedor_ids    String[]      @db.ObjectId
+  itens_pedido      ItemPedido[]
+ }
+
+
+
+model Fornecedor {
+  id                String        @id @default(auto()) @map("_id") @db.ObjectId
+  razao_social      String
+  nome_fantasia     String?
+  cnpj              String        @unique
+  email             String        @unique
+  logradouro        String
+  num_casa          String
+  complemento       String?
+  bairro            String
+  municipio         String
+  uf                String
+  cep               String
+  celular           String
+  produtos          Produto[]     @relation(fields: [produto_ids], references: [id])
+  produto_ids       String[]      @db.ObjectId
+
 }
+
+
+
+
+
+
+
+
