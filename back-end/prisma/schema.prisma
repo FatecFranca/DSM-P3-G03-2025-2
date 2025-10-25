@@ -57,8 +57,8 @@ model Pedido {
   mesa_id           String        @db.ObjectId
   mesa              Mesa          @relation(fields: [mesa_id], references: [id])
   itens             ItemPedido[]
-  garcom      Garcom[]  @relation(fields: [garcom_ids], references: [id])
-  garcom_ids    String[]      @db.ObjectId
+  garcom        Garcom[]  @relation(fields: [garcom_ids], references: [id])
+  garcom_ids     String[]      @db.ObjectId
 }
 
  model ItemPedido {
