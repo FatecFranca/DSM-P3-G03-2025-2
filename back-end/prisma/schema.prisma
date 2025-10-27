@@ -36,7 +36,8 @@ model Cliente {
   uf                String
   cep               String
   celular           String
-  mesa              Mesa[]
+  mesa_id           String?   @db.ObjectId  // Cliente pode ter uma mesa (opcional)
+  mesa              Mesa?     @relation(fields: [mesa_id], references: [id])
 }
 
 model Mesa {
@@ -44,24 +45,23 @@ model Mesa {
   numero            Int           @unique
   capacidade        Int
   status            String
-  cliente_id        String       @db.ObjectId
-  cliente           Cliente       @relation(fields: [cliente_id], references: [id])
+  clientes          Cliente[]     // Uma mesa pode ter vários clientes
   pedidos           Pedido[]
-  data_reserva    DateTime?
+  data_reserva      DateTime?
 }
 
 model Pedido {
   id                String        @id @default(auto()) @map("_id") @db.ObjectId
   num_pedido        Int           @unique
   data_hora         DateTime      @default(now())
-  mesa_id           String        @db.ObjectId
-  mesa              Mesa          @relation(fields: [mesa_id], references: [id])
+  mesa_id           String        @db.ObjectId      // Agora obrigatório (removido ?)
+  mesa              Mesa          @relation(fields: [mesa_id], references: [id])  // Agora obrigatório (removido ?)
+  garcom_id         String?       @db.ObjectId      // Continua opcional
+  garcom            Garcom?       @relation(fields: [garcom_id], references: [id])  // Continua opcional
   itens             ItemPedido[]
-  garcom        Garcom[]  @relation(fields: [garcom_ids], references: [id])
-  garcom_ids     String[]      @db.ObjectId
 }
 
- model ItemPedido {
+model ItemPedido {
   id                String        @id @default(auto()) @map("_id") @db.ObjectId
   num_item          Int
   quantidade        Float
@@ -82,11 +82,9 @@ model Garcom {
   email             String        @unique
   celular           String
   turno             String
-  ativo            Boolean       @default(true)
-  pedidos          Pedido[]     @relation(fields: [pedido_ids], references: [id])
-  pedido_ids       String[]      @db.ObjectId
+  ativo             Boolean       @default(true)
+  pedidos           Pedido[]      // One-to-many: um garçom pode ter muitos pedidos
 }
-
 
 model Produto {
   id                String        @id @default(auto()) @map("_id") @db.ObjectId
@@ -102,9 +100,7 @@ model Produto {
   fornecedores      Fornecedor[]  @relation(fields: [fornecedor_ids], references: [id])
   fornecedor_ids    String[]      @db.ObjectId
   itens_pedido      ItemPedido[]
- }
-
-
+}
 
 model Fornecedor {
   id                String        @id @default(auto()) @map("_id") @db.ObjectId
@@ -122,7 +118,6 @@ model Fornecedor {
   celular           String
   produtos          Produto[]     @relation(fields: [produto_ids], references: [id])
   produto_ids       String[]      @db.ObjectId
-
 }
 
 

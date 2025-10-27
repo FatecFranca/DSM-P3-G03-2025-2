@@ -16,21 +16,27 @@ app.use('/', indexRouter)
 app.use('/users', usersRouter)
 
 
-//-------------- ROTAS ---------  //
-
-import usuariosRouter from './routes/usuarios.js'
-app.use('/usuarios' , usuariosRouter)
-
-import mesasRouter from './routes/mesas.js'
-app.use('mesas' , mesasRouter)
-
-import pedidosRouter from './routes/pedidos.js'
-app.use('/pedidos' , pedidosRouter)
+/******************** ROTAS ********************/
+import categoriasRouter from './routes/categorias.js'
+app.use('/categorias', categoriasRouter)
 
 import produtosRouter from './routes/produtos.js'
-app.use('/produtos' , produtosRouter)
+app.use('/produtos', produtosRouter)
+
+import clientesRouter from './routes/clientes.js'
+app.use('/clientes', clientesRouter)
+
+import fornecedoresRouter from './routes/fornecedores.js'
+app.use('/fornecedores',  fornecedoresRouter)
+
+import pedidosRouter from './routes/pedidos.js'
+app.use('/pedidos',  pedidosRouter)
+
+import mesasRouter from './routes/mesas.js'
+app.use('/mesas' , mesasRouter)
 
 import garcomRouter from './routes/garcom.js'
 app.use('/garcom' , garcomRouter)
+/***********************************************/
 
 export default app

@@ -1,5 +1,5 @@
 import prisma from '../database/client.js'
-
+import { includeRelations } from '../lib/utils.js'
 const controller = {}   // Objeto vazio
 
 controller.create = async function(req, res) {
@@ -10,7 +10,7 @@ controller.create = async function(req, res) {
     ("req")
   */
   try {
-    await prisma.mesas.create({ data: req.body })
+    await prisma.mesa.create({ data: req.body })
 
     // Envia um código de sucesso ao front-end
     // HTTP 201: Created
@@ -28,12 +28,16 @@ controller.create = async function(req, res) {
 
 controller.retrieveAll = async function(req, res) {
   try {
-    // Manda buscar todas as categorias cadastradas no BD
-    const result = await prisma.mesas.findMany({
-      orderBy: [ { nome: 'asc' }]  // Ordem ASCendente
+
+    const include = includeRelations(req.query)
+
+    // Manda buscar todas os pedidos cadastradas no BD
+    const result = await prisma.mesa.findMany({
+      include,
+      orderBy: [ { numero: 'asc' }]  // Ordem ASCendente
     })
 
-    // Retorna os dados obtidos ao mesas com o status
+    // Retorna os dados obtidos ao cliente com o status
     // HTTP 200: OK (implícito)
     res.send(result)
   }
@@ -47,12 +51,17 @@ controller.retrieveAll = async function(req, res) {
   }
 }
 
+
 controller.retrieveOne = async function(req, res) {
   try {
+
+    const include = includeRelations(req.query)
+
     // Manda recuperar o documento no servidor de BD
     // usando como critério um id informado no parâmetro
     // da requisição
-    const result = await prisma.mesas.findUnique({
+    const result = await prisma.mesa.findUnique({
+      include,
       where: { id: req.params.id }
     })
 
@@ -71,11 +80,12 @@ controller.retrieveOne = async function(req, res) {
   }
 }
 
+
 controller.update = async function(req, res) {
   try {
     // Busca o documento passado como parâmetro e, caso o documento seja
     // encontrado, atualiza-o com as informações contidas em req.body
-    await prisma.mesas.update({
+    await prisma.mesa.update({
       where: { id: req.params.id },
       data: req.body
     })
@@ -104,7 +114,7 @@ controller.delete = async function(req, res) {
   try {
     // Busca o documento pelo id passado como parâmetro
     // e efetua a exclusão, caso o documento seja encontrado
-    await prisma.mesas.delete({
+    await prisma.mesa.delete({
       where: { id: req.params.id }
     })
 

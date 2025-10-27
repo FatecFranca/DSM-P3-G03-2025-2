@@ -21,11 +21,17 @@ A proposta de digitalização do processo por meio de um sistema integrado traz 
 
 ## Modelagem de Relacionamentos
 
-### Cliente – Mesa (Composição)
 
-**Justificativa:** A relação entre Cliente e Mesa caracteriza-se como composição, pois uma mesa pertence exclusivamente a um cliente durante sua ocupação. A mesa não tem sentido existir ativa no sistema sem estar associada a um cliente, representando assim uma forte dependência temporal e lógica. Se o cliente encerrar sua sessão, a mesa é automaticamente liberada e sua relação é encerrada.
 
-**Cardinalidade:** Cliente → 0..* Mesas | Mesa → 1 Cliente
+### Cliente – Mesa (Agregação)
+
+**Justificativa:** A relação entre Cliente e Mesa caracteriza-se como agregação, onde múltiplos clientes podem compartilhar uma mesa durante uma sessão (como em grupos familiares ou de amigos). Cada cliente está vinculado a uma única mesa por sessão, mas uma mesa pode acomodar vários clientes simultaneamente. A mesa existe independentemente dos clientes e pode estar vazia (disponível) ou ocupada por um ou mais clientes. Quando os clientes encerram sua sessão, a mesa é liberada mas continua existindo no sistema para futuras ocupações.
+
+**Cardinalidade:** Cliente → 1 Mesa | Mesa → 0..* Clientes
+
+
+
+
 
 ### Mesa – Pedido (Composição)
 
@@ -41,9 +47,9 @@ A proposta de digitalização do processo por meio de um sistema integrado traz 
 
 ### Pedido – Garçom (Associação)
 
-**Justificativa:** Este é um exemplo de associação, pois o garçom e o pedido são entidades independentes. Um garçom pode atender diversos pedidos, assim como um pedido pode ser manipulado por mais de um garçom durante seu atendimento. Não há dependência de existência entre eles.
+**Justificativa:** Este é um exemplo de associação, pois o garçom e o pedido são entidades independentes. Um garçom pode atender diversos pedidos, e um pedido deve ser atendido por apenas um garcom durante seu atendimento. Não há dependência de existência entre eles.
 
-**Cardinalidade:** Pedido → 0..* Garçom | Garçom → 0..* Pedido
+**Cardinalidade:** Pedido → 1 Garçom | Garçom → 0..* Pedido
 
 ### ItemPedido – Produto (Composição)
 
