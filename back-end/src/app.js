@@ -36,7 +36,7 @@ import mesasRouter from './routes/mesas.js'
 app.use('/mesas' , mesasRouter)
 
 import garcomRouter from './routes/garcom.js'
-app.use('/garcom' , garcomRouter)
+app.use('/garcons' , garcomRouter)
 /***********************************************/
 
 export default app
