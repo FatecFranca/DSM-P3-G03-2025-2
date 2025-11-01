@@ -22,20 +22,14 @@ model Categoria {
   produtos    Produto[]
 }
 
-model Cliente {
+model Usuario {
   id                String    @id @default(auto()) @map("_id") @db.ObjectId
   nome              String
   cpf               String    @unique     // Não pode se repetir na coleção
   data_nascimento   DateTime? // opcional
   email             String    @unique
-  logradouro        String    
-  num_imovel        String
-  complemento       String?   // opcional
-  bairro            String
-  municipio         String
-  uf                String
-  cep               String
   celular           String
+  tipo_user         String
   mesa_id           String?   @db.ObjectId  // Cliente pode ter uma mesa (opcional)
   mesa              Mesa?     @relation(fields: [mesa_id], references: [id])
 }
@@ -45,8 +39,9 @@ model Mesa {
   numero            Int           @unique
   capacidade        Int
   status            String
-  clientes          Cliente[]     // Uma mesa pode ter vários clientes
+  clientes          Usuario[]     // Uma mesa pode ter vários clientes
   pedidos           Pedido[]
+  numero_mesa        Int          @unique
   data_reserva      DateTime?
 }
 
@@ -58,6 +53,8 @@ model Pedido {
   mesa              Mesa          @relation(fields: [mesa_id], references: [id])  // Agora obrigatório (removido ?)
   garcom_id         String?       @db.ObjectId      // Continua opcional
   garcom            Garcom?       @relation(fields: [garcom_id], references: [id])  // Continua opcional
+  valor              String
+  pagamento          String
   itens             ItemPedido[]
 }
 

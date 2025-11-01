@@ -13,25 +13,30 @@ A proposta de digitalização do processo por meio de um sistema integrado traz 
 ## Objetivos
 
 - ✅ Automatizar o controle de mesas e pedidos, substituindo fichas físicas por um sistema digital integrado.
-- ✅ Associar mesas a clientes ativos, garantindo controle temporal e lógico da ocupação.
+- ✅ Associar mesas a usuários (clientes e administradores), garantindo controle temporal, lógico e hierárquico da ocupação.
 - ✅ Gerenciar pedidos e itens vinculados às mesas de forma automatizada.
 - ✅ Disponibilizar relatórios de desempenho e histórico de consumo.
 - ✅ Integrar a atuação dos garçons no processo de atendimento, mantendo rastreabilidade.
 - ✅ Permitir o cadastro e vinculação de produtos, categorias e fornecedores, com controle hierárquico e organizacional.
+- ✅ Implementar sistema de permissões diferenciadas para usuários (clientes e administradores).
 
 ## Modelagem de Relacionamentos
 
+### Usuário – Mesa (Agregação)
 
+**Justificativa:** A relação entre Usuário e Mesa caracteriza-se como uma agregação, pois o usuário (que pode ser um cliente comum ou um administrador) tem acesso às mesas de acordo com seu nível de permissão.
 
-### Cliente – Mesa (Agregação)
+Um usuário comum pode estar vinculado a apenas uma mesa por sessão, representando o cliente que ocupa um assento em um determinado momento. Já o usuário administrador (como o garçom ou gerente) pode ter acesso a várias mesas simultaneamente, para realizar o gerenciamento, atendimento ou monitoramento do serviço.
 
-**Justificativa:** A relação entre Cliente e Mesa caracteriza-se como agregação, onde múltiplos clientes podem compartilhar uma mesa durante uma sessão (como em grupos familiares ou de amigos). Cada cliente está vinculado a uma única mesa por sessão, mas uma mesa pode acomodar vários clientes simultaneamente. A mesa existe independentemente dos clientes e pode estar vazia (disponível) ou ocupada por um ou mais clientes. Quando os clientes encerram sua sessão, a mesa é liberada mas continua existindo no sistema para futuras ocupações.
+As mesas existem independentemente dos usuários e podem estar vazias (disponíveis) ou ocupadas. Quando a sessão de atendimento é encerrada, a mesa é liberada, mas continua registrada no sistema para futuras utilizações.
 
-**Cardinalidade:** Cliente → 1 Mesa | Mesa → 0..* Clientes
+**Cardinalidade:** 
+- Usuário → 1..* Mesas (no caso de administrador) / 1 Mesa (no caso de cliente)
+- Mesa → 1..* Usuários
 
-
-
-
+**Níveis de Acesso:**
+- **Cliente (Usuário Comum):** Acesso limitado a uma única mesa durante sua sessão
+- **Garçom/Gerente (Administrador):** Acesso simultâneo a múltiplas mesas para gerenciamento
 
 ### Mesa – Pedido (Composição)
 
@@ -47,7 +52,7 @@ A proposta de digitalização do processo por meio de um sistema integrado traz 
 
 ### Pedido – Garçom (Associação)
 
-**Justificativa:** Este é um exemplo de associação, pois o garçom e o pedido são entidades independentes. Um garçom pode atender diversos pedidos, e um pedido deve ser atendido por apenas um garcom durante seu atendimento. Não há dependência de existência entre eles.
+**Justificativa:** Este é um exemplo de associação, pois o garçom e o pedido são entidades independentes. Um garçom pode atender diversos pedidos, e um pedido deve ser atendido por apenas um garçom durante seu atendimento. Não há dependência de existência entre eles.
 
 **Cardinalidade:** Pedido → 1 Garçom | Garçom → 0..* Pedido
 
@@ -69,6 +74,27 @@ A proposta de digitalização do processo por meio de um sistema integrado traz 
 
 **Cardinalidade:** Produto → 0..* Fornecedores | Fornecedor → 0..* Produtos
 
+## Hierarquia de Usuários
+
+O sistema implementa diferentes níveis de acesso para garantir segurança e funcionalidade adequada:
+
+### Tipos de Usuário
+
+| Tipo | Permissões | Acesso a Mesas |
+|------|-----------|----------------|
+| **Cliente** | Visualizar cardápio, fazer pedidos, visualizar conta | 1 mesa (sua mesa atual) |
+| **Garçom** | Gerenciar pedidos, atualizar status, visualizar múltiplas mesas | N mesas (todas sob sua responsabilidade) |
+| **Gerente** | Todas as permissões + relatórios, configurações | N mesas (todas do estabelecimento) |
+| **Administrador** | Controle total do sistema | N mesas (acesso irrestrito) |
+
+### Fluxo de Acesso
+
+```
+1. Cliente → Login/QR Code → Vinculado a 1 Mesa → Faz Pedidos → Encerra Sessão
+2. Garçom → Login → Acesso a Múltiplas Mesas → Gerencia Pedidos → Atualiza Status
+3. Gerente → Login → Visão Geral → Relatórios → Controle Operacional
+```
+
 ## Conclusão
 
 A modelagem apresentada estabelece uma estrutura sólida de relacionamentos que reflete a lógica operacional do sistema. Foram adotadas corretamente as classificações conforme definição:
@@ -79,7 +105,9 @@ A modelagem apresentada estabelece uma estrutura sólida de relacionamentos que 
 | **Agregação** | Relação "todo-parte" com fraca dependência |
 | **Composição** | Relação de dependência total (um objeto não existe sem o outro) |
 
-A modelagem NoAM descrita é adequada para sistemas de atendimento em bares e restaurantes, permitindo implementação eficiente em bancos NoSQL como MongoDB ou Firebase.
+**Destaque para a modelagem Usuário-Mesa:** A alteração de Cliente-Mesa para Usuário-Mesa permite maior flexibilidade no sistema, possibilitando diferentes níveis de acesso e permissões. Isso garante que clientes tenham acesso limitado a sua mesa, enquanto administradores (garçons, gerentes) possam gerenciar múltiplas mesas simultaneamente, mantendo a segurança e organização do sistema.
+
+A modelagem NoAM descrita é adequada para sistemas de atendimento em bares e restaurantes, permitindo implementação eficiente em bancos NoSQL como MongoDB ou Firebase, bem como em bancos relacionais com ORMs modernos como Prisma.
 
 O sistema proposto visa modernizar e otimizar o atendimento em bares e restaurantes, substituindo processos manuais por uma solução digital integrada. A implementação do aplicativo cliente, associada ao painel administrativo, permite o gerenciamento eficiente de pedidos, mesas, pagamentos e relatórios de desempenho. Com isso, o projeto busca promover maior agilidade, precisão e controle operacional, beneficiando tanto o estabelecimento quanto a experiência do cliente.
 
@@ -90,3 +118,4 @@ O sistema proposto visa modernizar e otimizar o atendimento em bares e restauran
 - 📄 [Diagrama NoAM](./NoAM.drawio) - Modelagem visual dos relacionamentos
 - 🗃️ [Schema Prisma](../back-end/prisma/schema.prisma) - Implementação do banco de dados
 - 📋 [Memorial Descritivo PDF](./Memorial_Descritivo_Projeto_Interdisciplinar.pdf) - Documento original
+- 👥 [Sistema de Usuários](../back-end/src/modules/users/) - Implementação de autenticação e permissões
