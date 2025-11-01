@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 // @ts-ignore
 import "@/src/app/styles/globals.css";
-import { Providers } from "./providers";
+import  Providers  from "./providers";
+
 
 export const metadata: Metadata = {
   title: "Sistema de Gerenciamento de Mesas",
@@ -14,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="en">
       <body>
         <Providers>
           {children}
