@@ -32,15 +32,17 @@ export function Sidebar() {
   const pathname = usePathname();
 
   const navItems: NavItem[] = [
-    { name: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" />, href: '/admin/dashboard' },
-    { name: 'Mesas', icon: <UtensilsCrossed className="h-5 w-5" />, href: '/admin/mesas' },
-    { name: 'Pedidos', icon: <ShoppingCart className="h-5 w-5" />, href: '/admin/pedidos' },
+    { name: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" />, href: '/admin/dashboard', adminOnly: true },
+    { name: 'Mesas', icon: <UtensilsCrossed className="h-5 w-5" />, href: '/admin/mesas', adminOnly: true },
+    { name: 'Pedidos', icon: <ShoppingCart className="h-5 w-5" />, href: '/admin/pedidos', adminOnly: true },
     { name: 'Produtos', icon: <Package className="h-5 w-5" />, href: '/admin/produtos', adminOnly: true },
     { name: 'Categorias', icon: <Tag className="h-5 w-5" />, href: '/admin/categorias', adminOnly: true },
     { name: 'Fornecedores', icon: <TruckIcon className="h-5 w-5" />, href: '/admin/fornecedores', adminOnly: true },
     { name: 'Clientes', icon: <Users className="h-5 w-5" />, href: '/admin/clientes', adminOnly: true },
     { name: 'Garçons', icon: <UserCog className="h-5 w-5" />, href: '/admin/garcons', adminOnly: true },
     { name: 'Relatórios', icon: <BarChart3 className="h-5 w-5" />, href: '/admin/relatorios', adminOnly: true },
+    { name: 'Mesas', icon: <UtensilsCrossed className="h-5 w-5" />, href: '/garcom/mesas' },
+    { name: 'Pedidos', icon: <ShoppingCart className="h-5 w-5" />, href: '/garcom/pedidos'},
   ];
 
   const filteredItems = navItems.filter((item) => !item.adminOnly || isAdmin);

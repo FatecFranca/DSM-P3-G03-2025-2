@@ -32,8 +32,11 @@ export interface Mesa {
   capacidade: number;
   status: MesaStatus;
   data_reserva?: string;
-  clientes?: Cliente[];
+  clientes?: String;
   pedidos?: Pedido[];
+  created_at: string;
+  updated_at: string;
+  tempo_ocupacao?: string;
 }
 
 export type PedidoStatus = 'Pendente' | 'Em andamento' | 'Concluído' | 'Cancelado';
@@ -42,8 +45,8 @@ export interface Pedido {
   id: string;
   num_pedido: string;
   data_hora: string;
-  mesa_id: string;
-  mesa?: Mesa;
+  mesa_id: String;
+  mesa: String;
   garcom_id?: string;
   garcom?: Garcom;
   itens?: ItemPedido[];
@@ -60,6 +63,7 @@ export interface ItemPedido {
   pedido_id: string;
   pedido?: Pedido;
   subtotal?: number;
+  observacoes?: string;
 }
 
 export type Turno = 'Manhã' | 'Tarde' | 'Noite';

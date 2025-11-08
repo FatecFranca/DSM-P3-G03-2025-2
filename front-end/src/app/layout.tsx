@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 // @ts-ignore
 import "@/src/app/styles/globals.css";
-import  Providers  from "./providers";
+import  Providers  from "@/src/app/(public)/providers";
 
 
 export const metadata: Metadata = {

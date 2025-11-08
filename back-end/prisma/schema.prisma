@@ -22,14 +22,15 @@ model Categoria {
   produtos    Produto[]
 }
 
-model Usuario {
+model Cliente {
   id                String    @id @default(auto()) @map("_id") @db.ObjectId
   nome              String
   cpf               String    @unique     // Não pode se repetir na coleção
   data_nascimento   DateTime? // opcional
+  senha             String
   email             String    @unique
+  admin             Boolean   @default(false)
   celular           String
-  tipo_user         String
   mesa_id           String?   @db.ObjectId  // Cliente pode ter uma mesa (opcional)
   mesa              Mesa?     @relation(fields: [mesa_id], references: [id])
 }
@@ -39,7 +40,7 @@ model Mesa {
   numero            Int           @unique
   capacidade        Int
   status            String
-  clientes          Usuario[]     // Uma mesa pode ter vários clientes
+  clientes          Cliente[]     // Uma mesa pode ter vários clientes
   pedidos           Pedido[]
   numero_mesa        Int          @unique
   data_reserva      DateTime?
@@ -64,6 +65,7 @@ model ItemPedido {
   quantidade        Float
   produto_id        String        @db.ObjectId
   produto           Produto       @relation(fields: [produto_id], references: [id])
+  observacao      String?
   pedido_id         String        @db.ObjectId
   pedido            Pedido        @relation(fields: [pedido_id], references: [id])
 
@@ -78,6 +80,7 @@ model Garcom {
   cpf               String        @unique
   email             String        @unique
   celular           String
+  senha             String
   turno             String
   ativo             Boolean       @default(true)
   pedidos           Pedido[]      // One-to-many: um garçom pode ter muitos pedidos

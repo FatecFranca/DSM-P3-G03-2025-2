@@ -22,21 +22,16 @@ A proposta de digitalização do processo por meio de um sistema integrado traz 
 
 ## Modelagem de Relacionamentos
 
-### Usuário – Mesa (Agregação)
+### Cliente – Mesa (Agregação)
 
-**Justificativa:** A relação entre Usuário e Mesa caracteriza-se como uma agregação, pois o usuário (que pode ser um cliente comum ou um administrador) tem acesso às mesas de acordo com seu nível de permissão.
+**Justificativa:** A relação entre Cliente e Mesa caracteriza-se como agregação, onde múltiplos clientes podem compartilhar uma mesa durante uma sessão (como em grupos familiares ou de amigos). Cada cliente está vinculado a uma única mesa por sessão, mas uma mesa pode acomodar vários clientes simultaneamente. A mesa existe independentemente dos clientes e pode estar vazia (disponível) ou ocupada por um ou mais clientes. Quando os clientes encerram sua sessão, a mesa é liberada mas continua existindo no sistema para futuras ocupações.
 
-Um usuário comum pode estar vinculado a apenas uma mesa por sessão, representando o cliente que ocupa um assento em um determinado momento. Já o usuário administrador (como o garçom ou gerente) pode ter acesso a várias mesas simultaneamente, para realizar o gerenciamento, atendimento ou monitoramento do serviço.
+**Cardinalidade:** Cliente → 1 Mesa | Mesa → 0..* Clientes
 
-As mesas existem independentemente dos usuários e podem estar vazias (disponíveis) ou ocupadas. Quando a sessão de atendimento é encerrada, a mesa é liberada, mas continua registrada no sistema para futuras utilizações.
-
-**Cardinalidade:** 
-- Usuário → 1..* Mesas (no caso de administrador) / 1 Mesa (no caso de cliente)
-- Mesa → 1..* Usuários
 
 **Níveis de Acesso:**
 - **Cliente (Usuário Comum):** Acesso limitado a uma única mesa durante sua sessão
-- **Garçom/Gerente (Administrador):** Acesso simultâneo a múltiplas mesas para gerenciamento
+- **Gerente (Administrador):** Acesso simultâneo a múltiplas mesas para gerenciamento
 
 ### Mesa – Pedido (Composição)
 

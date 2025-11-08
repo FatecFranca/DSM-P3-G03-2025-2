@@ -214,6 +214,7 @@ export default function PedidoMesaPage() {
       num_pedido: `PED${String(Date.now()).slice(-6)}`,
       data_hora: new Date().toISOString(),
       mesa_id: mesaNumero.toString(),
+      mesa: mesaNumero.toString(),
       total: cartTotal,
       status: 'Pendente',
       itens: cart.map((item, index) => ({
