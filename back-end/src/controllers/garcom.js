@@ -1,5 +1,12 @@
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 import prisma from '../database/client.js'
 import { includeRelations } from '../lib/utils.js'
+
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key'
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
+const SALT_ROUNDS = 10
+
 const controller = {}   // Objeto vazio
 
 controller.create = async function(req, res) {
@@ -10,7 +17,14 @@ controller.create = async function(req, res) {
     ("req")
   */
   try {
-    await prisma.garcom.create({ data: req.body })
+    const data = { ...req.body }
+    
+    // Hash da senha se foi fornecida
+    if (data.senha) {
+      data.senha = await bcrypt.hash(data.senha, SALT_ROUNDS)
+    }
+
+    await prisma.garcom.create({ data })
 
     // Envia um código de sucesso ao front-end
     // HTTP 201: Created
@@ -81,11 +95,21 @@ controller.retrieveOne = async function(req, res) {
 
 controller.update = async function(req, res) {
   try {
+    const data = { ...req.body }
+    
+    // Hash da senha se foi fornecida e não está vazia
+    if (data.senha && data.senha.trim() !== '') {
+      data.senha = await bcrypt.hash(data.senha, SALT_ROUNDS)
+    } else {
+      // Remove senha do objeto se estiver vazia (não atualizar)
+      delete data.senha
+    }
+
     // Busca o documento passado como parâmetro e, caso o documento seja
     // encontrado, atualiza-o com as informações contidas em req.body
     await prisma.garcom.update({
       where: { id: req.params.id },
-      data: req.body
+      data
     })
 
     // Encontrou e atualizou ~> retorna HTTP 204: No Content
@@ -133,6 +157,77 @@ controller.delete = async function(req, res) {
       // HTTP 500: Internal Server Error
       res.status(500).send(error)
     }
+  }
+}
+
+// Login de Garçom
+controller.login = async function(req, res) {
+  try {
+    const { email, senha } = req.body
+
+    console.log('🔐 [GARÇOM] Tentativa de login:', email)
+
+    if (!email) {
+      console.log('❌ [GARÇOM] Email não fornecido')
+      return res.status(400).json({ error: 'Email é obrigatório' })
+    }
+
+    // Buscar garçom por email
+    const garcom = await prisma.garcom.findUnique({
+      where: { email }
+    })
+
+    console.log('🔍 [GARÇOM] Garçom encontrado:', !!garcom)
+    
+    if (!garcom) {
+      console.log('❌ [GARÇOM] Garçom não encontrado no banco')
+      return res.status(401).json({ error: 'Credenciais inválidas' })
+    }
+
+    console.log('🔐 [GARÇOM] Verificando senha...')
+    console.log('   - Senha fornecida:', !!senha)
+    console.log('   - Senha no banco:', !!garcom.senha)
+
+    // Verificar senha (se fornecida e se existe no banco)
+    if (senha && garcom.senha) {
+      const senhaValida = await bcrypt.compare(senha, garcom.senha)
+      console.log('🔑 [GARÇOM] Senha válida:', senhaValida)
+      
+      if (!senhaValida) {
+        console.log('❌ [GARÇOM] Senha inválida')
+        return res.status(401).json({ error: 'Credenciais inválidas' })
+      }
+    } else if (senha && !garcom.senha) {
+      console.log('⚠️ [GARÇOM] Senha fornecida mas não há hash no banco')
+      return res.status(401).json({ error: 'Credenciais inválidas' })
+    }
+
+    console.log('✅ [GARÇOM] Login bem sucedido')
+
+    // Gerar token JWT
+    const token = jwt.sign(
+      { 
+        id: garcom.id, 
+        email: garcom.email,
+        garcom: true,
+        tipo: 'garcom'
+      },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    )
+
+    res.json({
+      token,
+      user: {
+        id: garcom.id,
+        nome: garcom.nome,
+        email: garcom.email,
+        role: 'garcom'
+      }
+    })
+  } catch (error) {
+    console.error('❌ [GARÇOM] Erro no login:', error)
+    res.status(500).json({ error: error.message })
   }
 }
 

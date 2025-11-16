@@ -15,33 +15,36 @@ export default function SignInPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validação de senha
+    if (!password || password.trim() === '') {
+      setError('A senha é obrigatória');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const loggedUser = await login(email, password);
-      
-      // Redirecionar baseado no role do usuário
-      switch (loggedUser.role) {
-        case 'admin':
-          router.push('/admin/dashboard');
-          break;
-        case 'garcom':
-          router.push('/garcom/mesas');
-          break;
-        case 'cliente':
-          router.push('/cliente/select-mesa');
-          break;
-        default:
-          router.push('/');
+
+      // Redirecionar baseado no role
+      if (loggedUser.role === 'admin') {
+        router.push('/admin/dashboard');
+      } else if (loggedUser.role === 'garcom') {
+        router.push('/garcom/mesas');
+      } else if (loggedUser.role === 'cliente') {
+        router.push('/cliente/select-mesa');
+      } else {
+        router.push('/');
       }
-    } catch (err) {
-      setError('Email ou senha inválidos');
+    } catch (err: any) {
+      setError(err.message || 'Erro ao fazer login');
     } finally {
       setLoading(false);
     }
@@ -54,8 +57,8 @@ export default function SignInPage() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary">
             <UtensilsCrossed className="h-8 w-8 text-primary-foreground" />
           </div>
-          <CardTitle>Sistema de Gerenciamento de Mesas</CardTitle>
-          <CardDescription>Entre com suas credenciais para acessar</CardDescription>
+          <CardTitle>Sistema de Gerenciamento</CardTitle>
+          <CardDescription>Entre com seu email e senha</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -68,6 +71,7 @@ export default function SignInPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -79,7 +83,12 @@ export default function SignInPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
+                minLength={6}
               />
+              <p className="text-xs text-muted-foreground">
+                Mínimo de 6 caracteres
+              </p>
             </div>
 
             {error && (
@@ -97,21 +106,6 @@ export default function SignInPage() {
               <Link href="/register" className="text-primary hover:underline font-medium">
                 Criar conta
               </Link>
-            </div>
-
-            <div className="mt-4 space-y-2 rounded-md bg-muted p-4">
-              <p className="text-sm text-muted-foreground">Credenciais de teste:</p>
-              <div className="space-y-1 text-sm">
-                <p>
-                  <strong>Admin:</strong> admin@mesa.com / admin123
-                </p>
-                <p>
-                  <strong>Garçom:</strong> garcom@mesa.com / garcom123
-                </p>
-                <p>
-                  <strong>Cliente:</strong> cliente@mesa.com / cliente123
-                </p>
-              </div>
             </div>
           </form>
         </CardContent>

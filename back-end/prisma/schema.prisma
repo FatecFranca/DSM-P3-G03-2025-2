@@ -42,21 +42,24 @@ model Mesa {
   status            String
   clientes          Cliente[]     // Uma mesa pode ter vários clientes
   pedidos           Pedido[]
-  numero_mesa        Int          @unique
+  numero_mesa       Int           @unique
   data_reserva      DateTime?
+  total             Float         @default(0)        // Total gasto na mesa
 }
 
 model Pedido {
   id                String        @id @default(auto()) @map("_id") @db.ObjectId
   num_pedido        Int           @unique
   data_hora         DateTime      @default(now())
-  mesa_id           String        @db.ObjectId      // Agora obrigatório (removido ?)
-  mesa              Mesa          @relation(fields: [mesa_id], references: [id])  // Agora obrigatório (removido ?)
-  garcom_id         String?       @db.ObjectId      // Continua opcional
-  garcom            Garcom?       @relation(fields: [garcom_id], references: [id])  // Continua opcional
-  valor              String
-  pagamento          String
+  mesa_id           String?        @db.ObjectId      // Obrigatório
+  mesa              Mesa?          @relation(fields: [mesa_id], references: [id])
+  garcom_id         String?       @db.ObjectId      // Opcional
+  garcom            Garcom?       @relation(fields: [garcom_id], references: [id])
+  valor             Float                           // Valor total do pedido
+  pagamento         String        @default("pago")  // Pagamento imediato: "pago"
+  status_preparo    String?        @default("aguardando") // Status de preparo: aguardando, em_preparo, pronto, entregue
   itens             ItemPedido[]
+  
 }
 
 model ItemPedido {
@@ -65,7 +68,6 @@ model ItemPedido {
   quantidade        Float
   produto_id        String        @db.ObjectId
   produto           Produto       @relation(fields: [produto_id], references: [id])
-  observacao      String?
   pedido_id         String        @db.ObjectId
   pedido            Pedido        @relation(fields: [pedido_id], references: [id])
 

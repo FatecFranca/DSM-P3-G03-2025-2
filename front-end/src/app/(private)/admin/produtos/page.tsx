@@ -1,321 +1,368 @@
 "use client";
-
-import { useState } from 'react';
-import { Produto, UnidadeMedida } from '@/src/app/types';
-import { DataTable, Column } from '@/src/app/components/DataTable';
-import { Button } from '@/src/app/components/ui/button';
-import { Input } from '@/src/app/components/ui/input';
-import { Plus, Search } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Button } from "@/src/app/components/ui/button";
+import { Input } from "@/src/app/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/src/app/components/ui/card";
+import { Plus, Search, Pencil, Trash2, Package } from "lucide-react";
+import { produtosAPI, categoriasAPI } from "@/src/app/lib/api";
+import { Produto, Categoria } from "@/src/app/types";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/src/app/components/ui/dialog';
-import { Label } from '@/src/app/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/app/components/ui/select';
-import { Textarea } from '@/src/app/components/ui/textarea';
-import { toast } from 'sonner';
-
-// Mock data
-const mockProdutos: Produto[] = [
-  {
-    id: '1',
-    nome: 'Refrigerante Coca-Cola',
-    marca: 'Coca-Cola',
-    detalhes: 'Lata 350ml',
-    quantidade: 1,
-    unidade_medida: 'UN',
-    preco_unitario: 8.00,
-    qtd_estoque: 50,
-    categoria_id: '1',
-    fornecedor_ids: ['1'],
-  },
-  {
-    id: '2',
-    nome: 'Hambúrguer Artesanal',
-    marca: 'Casa',
-    detalhes: 'Hambúrguer 200g com queijo, alface e tomate',
-    quantidade: 1,
-    unidade_medida: 'UN',
-    preco_unitario: 25.00,
-    qtd_estoque: 30,
-    categoria_id: '2',
-    fornecedor_ids: ['2'],
-  },
-  {
-    id: '3',
-    nome: 'Batata Frita',
-    marca: 'Casa',
-    quantidade: 500,
-    unidade_medida: 'KG',
-    preco_unitario: 15.00,
-    qtd_estoque: 20,
-    categoria_id: '2',
-    fornecedor_ids: ['2'],
-  },
-];
+  DialogFooter,
+} from "@/src/app/components/ui/dialog";
+import { Label } from "@/src/app/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/app/components/ui/select";
 
 export default function ProdutosPage() {
-  const [produtos, setProdutos] = useState<Produto[]>(mockProdutos);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedProduto, setSelectedProduto] = useState<Produto | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<Partial<Produto>>({
-    nome: '',
-    marca: '',
-    detalhes: '',
-    quantidade: 1,
-    unidade_medida: 'UN',
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingProduto, setEditingProduto] = useState<Produto | null>(null);
+  const [formData, setFormData] = useState({
+    nome: "",
+    marca: "",
+    detalhes: "",
+    quantidade: 0,
+    unidade_medida: "UN",
     preco_unitario: 0,
     qtd_estoque: 0,
-    categoria_id: '',
-    fornecedor_ids: [],
+    categoria_id: "",
+    fornecedor_ids: [] as string[],
   });
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [produtosData, categoriasData] = await Promise.all([
+        produtosAPI.list({ include: 'categoria' }),
+        categoriasAPI.list(),
+      ]);
+      setProdutos(Array.isArray(produtosData) ? produtosData : []);
+      setCategorias(Array.isArray(categoriasData) ? categoriasData : []);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+      setProdutos([]);
+      setCategorias([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja deletar este produto?")) return;
+
+    try {
+      await produtosAPI.delete(id);
+      setProdutos(produtos.filter((p) => p.id !== id));
+    } catch (error) {
+      console.error("Erro ao deletar produto:", error);
+      alert("Erro ao deletar produto");
+    }
+  };
+
+  const handleOpenModal = (produto?: Produto) => {
+    if (produto) {
+      setEditingProduto(produto);
+      setFormData({
+        nome: produto.nome,
+        marca: produto.marca,
+        detalhes: produto.detalhes || "",
+        quantidade: produto.quantidade,
+        unidade_medida: produto.unidade_medida,
+        preco_unitario: produto.preco_unitario,
+        qtd_estoque: produto.qtd_estoque,
+        categoria_id: produto.categoria_id,
+        fornecedor_ids: produto.fornecedor_ids || [],
+      });
+    } else {
+      setEditingProduto(null);
+      setFormData({
+        nome: "",
+        marca: "",
+        detalhes: "",
+        quantidade: 0,
+        unidade_medida: "UN",
+        preco_unitario: 0,
+        qtd_estoque: 0,
+        categoria_id: "",
+        fornecedor_ids: [],
+      });
+    }
+    setModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (editingProduto) {
+        await produtosAPI.update(editingProduto.id, formData);
+      } else {
+        await produtosAPI.create(formData);
+      }
+      setModalOpen(false);
+      loadData();
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      alert("Erro ao salvar produto");
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
 
   const filteredProdutos = produtos.filter((produto) =>
     produto.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    produto.marca.toLowerCase().includes(searchTerm.toLowerCase())
+    produto.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    produto.detalhes?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const columns: Column<Produto>[] = [
-    { header: 'Nome', accessor: 'nome' },
-    { header: 'Marca', accessor: 'marca' },
-    { header: 'Estoque', accessor: (row) => `${row.qtd_estoque} ${row.unidade_medida}` },
-    {
-      header: 'Preço',
-      accessor: (row) => `R$ ${row.preco_unitario.toFixed(2)}`,
-    },
-  ];
-
-  const handleView = (produto: Produto) => {
-    setSelectedProduto(produto);
-  };
-
-  const handleEdit = (produto: Produto) => {
-    setFormData(produto);
-    setIsEditing(true);
-    setShowForm(true);
-  };
-
-  const handleCreate = () => {
-    setFormData({
-      nome: '',
-      marca: '',
-      detalhes: '',
-      quantidade: 1,
-      unidade_medida: 'UN',
-      preco_unitario: 0,
-      qtd_estoque: 0,
-      categoria_id: '',
-      fornecedor_ids: [],
-    });
-    setIsEditing(false);
-    setShowForm(true);
-  };
-
-  const handleDelete = (produto: Produto) => {
-    if (confirm(`Deseja realmente excluir ${produto.nome}?`)) {
-      setProdutos(produtos.filter((p) => p.id !== produto.id));
-      toast.success('Produto excluído com sucesso!');
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isEditing && formData.id) {
-      setProdutos(produtos.map((p) => (p.id === formData.id ? formData as Produto : p)));
-      toast.success('Produto atualizado com sucesso!');
-    } else {
-      const newProduto: Produto = {
-        ...formData,
-        id: Date.now().toString(),
-      } as Produto;
-      setProdutos([...produtos, newProduto]);
-      toast.success('Produto criado com sucesso!');
-    }
-    setShowForm(false);
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg">Carregando produtos...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1>Produtos</h1>
-          <p className="text-muted-foreground">
-            Gerencie o catálogo de produtos
-          </p>
+          <h1 className="text-3xl font-bold">Produtos</h1>
+          <p className="text-muted-foreground">Gerencie o cardápio</p>
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={() => handleOpenModal()}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Produto
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Buscar produto..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={filteredProdutos}
-        onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        keyExtractor={(row) => row.id}
-      />
-
-      {/* Dialog de Visualização */}
-      <Dialog open={!!selectedProduto} onOpenChange={() => setSelectedProduto(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedProduto?.nome}</DialogTitle>
-            <DialogDescription>Detalhes do produto</DialogDescription>
-          </DialogHeader>
-          {selectedProduto && (
-            <div className="space-y-3">
-              <div>
-                <Label>Marca</Label>
-                <p>{selectedProduto.marca}</p>
-              </div>
-              {selectedProduto.detalhes && (
-                <div>
-                  <Label>Detalhes</Label>
-                  <p>{selectedProduto.detalhes}</p>
-                </div>
-              )}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Quantidade</Label>
-                  <p>{selectedProduto.quantidade} {selectedProduto.unidade_medida}</p>
-                </div>
-                <div>
-                  <Label>Preço Unitário</Label>
-                  <p>R$ {selectedProduto.preco_unitario.toFixed(2)}</p>
-                </div>
-              </div>
-              <div>
-                <Label>Estoque</Label>
-                <p>{selectedProduto.qtd_estoque} {selectedProduto.unidade_medida}</p>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog de Criação/Edição */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{isEditing ? 'Editar' : 'Novo'} Produto</DialogTitle>
-            <DialogDescription>
-              {isEditing ? 'Edite as informações' : 'Adicione um novo produto'}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="nome">Nome *</Label>
-                <Input
-                  id="nome"
-                  value={formData.nome}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="marca">Marca *</Label>
-                <Input
-                  id="marca"
-                  value={formData.marca}
-                  onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="detalhes">Detalhes</Label>
-              <Textarea
-                id="detalhes"
-                value={formData.detalhes}
-                onChange={(e) => setFormData({ ...formData, detalhes: e.target.value })}
-                rows={3}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Buscar produtos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
               />
             </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredProdutos.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                {searchTerm ? "Nenhum produto encontrado" : "Nenhum produto cadastrado"}
+              </div>
+            ) : (
+              filteredProdutos.map((produto) => (
+                <Card key={produto.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Package className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => handleOpenModal(produto)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(produto.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <h3 className="font-semibold text-lg mb-1">{produto.nome}</h3>
+                    <p className="text-sm text-muted-foreground mb-2">{produto.marca}</p>
+                    {produto.detalhes && (
+                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                        {produto.detalhes}
+                      </p>
+                    )}
+                    <div className="space-y-1 text-sm">
+                      <p className="font-semibold text-primary">
+                        {formatCurrency(produto.preco_unitario)}
+                      </p>
+                      <p>
+                        Estoque: {produto.qtd_estoque} {produto.unidade_medida}
+                      </p>
+                      {produto.categoria && (
+                        <p className="text-muted-foreground">
+                          {produto.categoria.descricao}
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="quantidade">Quantidade *</Label>
+      <div className="text-sm text-muted-foreground">
+        Total: {filteredProdutos.length} produto(s)
+      </div>
+
+      {/* Modal Criar/Editar */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingProduto ? "Editar Produto" : "Novo Produto"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nome">Nome*</Label>
+                  <Input
+                    id="nome"
+                    value={formData.nome}
+                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="marca">Marca*</Label>
+                  <Input
+                    id="marca"
+                    value={formData.marca}
+                    onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="detalhes">Detalhes</Label>
                 <Input
-                  id="quantidade"
-                  type="number"
-                  step="0.01"
-                  value={formData.quantidade}
-                  onChange={(e) => setFormData({ ...formData, quantidade: parseFloat(e.target.value) })}
-                  required
+                  id="detalhes"
+                  value={formData.detalhes}
+                  onChange={(e) => setFormData({ ...formData, detalhes: e.target.value })}
                 />
               </div>
-              <div>
-                <Label htmlFor="unidade">Unidade de Medida *</Label>
-                <Select
-                  value={formData.unidade_medida}
-                  onValueChange={(value) => setFormData({ ...formData, unidade_medida: value as UnidadeMedida })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="UN">Unidade (UN)</SelectItem>
-                    <SelectItem value="KG">Quilograma (KG)</SelectItem>
-                    <SelectItem value="L">Litro (L)</SelectItem>
-                    <SelectItem value="CX">Caixa (CX)</SelectItem>
-                    <SelectItem value="PC">Peça (PC)</SelectItem>
-                  </SelectContent>
-                </Select>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="quantidade">Quantidade*</Label>
+                  <Input
+                    id="quantidade"
+                    type="number"
+                    step="0.01"
+                    value={formData.quantidade}
+                    onChange={(e) =>
+                      setFormData({ ...formData, quantidade: parseFloat(e.target.value) || 0 })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="unidade_medida">Unidade*</Label>
+                  <Select
+                    value={formData.unidade_medida}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, unidade_medida: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="UN">UN</SelectItem>
+                      <SelectItem value="KG">KG</SelectItem>
+                      <SelectItem value="G">G</SelectItem>
+                      <SelectItem value="L">L</SelectItem>
+                      <SelectItem value="ML">ML</SelectItem>
+                      <SelectItem value="CX">CX</SelectItem>
+                      <SelectItem value="PC">PC</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="qtd_estoque">Estoque*</Label>
+                  <Input
+                    id="qtd_estoque"
+                    type="number"
+                    step="0.01"
+                    value={formData.qtd_estoque}
+                    onChange={(e) =>
+                      setFormData({ ...formData, qtd_estoque: parseFloat(e.target.value) || 0 })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="preco_unitario">Preço Unitário*</Label>
+                  <Input
+                    id="preco_unitario"
+                    type="number"
+                    step="0.01"
+                    value={formData.preco_unitario}
+                    onChange={(e) =>
+                      setFormData({ ...formData, preco_unitario: parseFloat(e.target.value) || 0 })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="categoria_id">Categoria*</Label>
+                  <Select
+                    value={formData.categoria_id}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, categoria_id: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categorias.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.descricao}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="preco">Preço Unitário *</Label>
-                <Input
-                  id="preco"
-                  type="number"
-                  step="0.01"
-                  value={formData.preco_unitario}
-                  onChange={(e) => setFormData({ ...formData, preco_unitario: parseFloat(e.target.value) })}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="estoque">Quantidade em Estoque *</Label>
-                <Input
-                  id="estoque"
-                  type="number"
-                  value={formData.qtd_estoque}
-                  onChange={(e) => setFormData({ ...formData, qtd_estoque: parseInt(e.target.value) })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Button type="submit" className="flex-1">
-                {isEditing ? 'Salvar' : 'Criar'}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setShowForm(false)} className="flex-1">
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
                 Cancelar
               </Button>
-            </div>
+              <Button type="submit">Salvar</Button>
+            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>

@@ -11,47 +11,38 @@ export interface Cliente {
   nome: string;
   cpf: string;
   data_nascimento?: string;
+  senha: string;
   email: string;
-  logradouro: string;
-  num_imovel: string;
-  complemento?: string;
-  bairro: string;
-  municipio: string;
-  uf: string;
-  cep: string;
+  admin: boolean;
   celular: string;
   mesa_id?: string;
   mesa?: Mesa;
 }
 
-export type MesaStatus = 'Disponível' | 'Reservada' | 'Ocupada' | 'Em atendimento' | 'Fechada';
+export type MesaStatus = 'livre' | 'reservada' | 'ocupada';
 
 export interface Mesa {
   id: string;
   numero: number;
   capacidade: number;
-  status: MesaStatus;
+  status: string;
+  numero_mesa: number;
   data_reserva?: string;
-  clientes?: String;
+  clientes?: Cliente[];
   pedidos?: Pedido[];
-  created_at: string;
-  updated_at: string;
-  tempo_ocupacao?: string;
 }
-
-export type PedidoStatus = 'Pendente' | 'Em andamento' | 'Concluído' | 'Cancelado';
 
 export interface Pedido {
   id: string;
-  num_pedido: string;
+  num_pedido: number;
   data_hora: string;
-  mesa_id: String;
-  mesa: String;
+  mesa_id: string;
+  mesa?: Mesa;
   garcom_id?: string;
   garcom?: Garcom;
+  valor: string;
+  pagamento: string;
   itens?: ItemPedido[];
-  total?: number;
-  status?: PedidoStatus;
 }
 
 export interface ItemPedido {
@@ -60,13 +51,12 @@ export interface ItemPedido {
   quantidade: number;
   produto_id: string;
   produto?: Produto;
+  observacao?: string;
   pedido_id: string;
   pedido?: Pedido;
-  subtotal?: number;
-  observacoes?: string;
 }
 
-export type Turno = 'Manhã' | 'Tarde' | 'Noite';
+export type Turno = 'manha' | 'tarde' | 'noite';
 
 export interface Garcom {
   id: string;
@@ -74,12 +64,13 @@ export interface Garcom {
   cpf: string;
   email: string;
   celular: string;
-  turno: Turno;
+  senha: string;
+  turno: string;
   ativo: boolean;
   pedidos?: Pedido[];
 }
 
-export type UnidadeMedida = 'UN' | 'KG' | 'L' | 'CX' | 'PC';
+export type UnidadeMedida = 'UN' | 'KG' | 'L' | 'CX' | 'PC' | 'ML' | 'G';
 
 export interface Produto {
   id: string;
@@ -103,7 +94,7 @@ export interface Fornecedor {
   cnpj: string;
   email: string;
   logradouro: string;
-  num_imovel: string;
+  num_casa: string; // Corrigido: era num_imovel
   complemento?: string;
   bairro: string;
   municipio: string;
@@ -122,6 +113,7 @@ export interface User {
   email: string;
   role: UserRole;
   avatar?: string;
+  mesa_id?: string;
 }
 
 export interface DashboardMetrics {

@@ -1,310 +1,311 @@
 "use client";
-
-import { useState } from 'react';
-import { Fornecedor } from '@/src/app/types';
-import { DataTable, Column } from '@/src/app/components/DataTable';
-import { Button } from '@/src/app/components/ui/button';
-import { Input } from '@/src/app/components/ui/input';
-import { Plus, Search } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Button } from "@/src/app/components/ui/button";
+import { Input } from "@/src/app/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/src/app/components/ui/card";
+import { Plus, Search, Pencil, Trash2, Building2, Phone, Mail } from "lucide-react";
+import { fornecedoresAPI } from "@/src/app/lib/api";
+import { Fornecedor } from "@/src/app/types";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/src/app/components/ui/dialog';
-import { Label } from '@/src/app/components/ui/label';
-import { toast } from 'sonner';
-
-// Mock data
-const mockFornecedores: Fornecedor[] = [
-  {
-    id: '1',
-    razao_social: 'Distribuidora ABC Ltda',
-    nome_fantasia: 'ABC Bebidas',
-    cnpj: '12.345.678/0001-90',
-    email: 'contato@abc.com',
-    celular: '(11) 3456-7890',
-    logradouro: 'Av. Industrial',
-    num_imovel: '500',
-    bairro: 'Distrito Industrial',
-    municipio: 'São Paulo',
-    uf: 'SP',
-    cep: '04567-890',
-    produto_ids: [],
-  },
-  {
-    id: '2',
-    razao_social: 'Alimentos XYZ S.A.',
-    nome_fantasia: 'XYZ Alimentos',
-    cnpj: '98.765.432/0001-10',
-    email: 'vendas@xyz.com',
-    celular: '(11) 2345-6789',
-    logradouro: 'Rua Comercial',
-    num_imovel: '1200',
-    complemento: 'Galpão 3',
-    bairro: 'Centro',
-    municipio: 'Guarulhos',
-    uf: 'SP',
-    cep: '07123-456',
-    produto_ids: [],
-  },
-];
+  DialogFooter,
+} from "@/src/app/components/ui/dialog";
+import { Label } from "@/src/app/components/ui/label";
 
 export default function FornecedoresPage() {
-  const [fornecedores, setFornecedores] = useState<Fornecedor[]>(mockFornecedores);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFornecedor, setSelectedFornecedor] = useState<Fornecedor | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<Partial<Fornecedor>>({
-    razao_social: '',
-    nome_fantasia: '',
-    cnpj: '',
-    email: '',
-    celular: '',
-    logradouro: '',
-    num_imovel: '',
-    complemento: '',
-    bairro: '',
-    municipio: '',
-    uf: '',
-    cep: '',
-    produto_ids: [],
+  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingFornecedor, setEditingFornecedor] = useState<Fornecedor | null>(null);
+  const [formData, setFormData] = useState({
+    razao_social: "",
+    nome_fantasia: "",
+    cnpj: "",
+    email: "",
+    logradouro: "",
+    num_casa: "",
+    complemento: "",
+    bairro: "",
+    municipio: "",
+    uf: "",
+    cep: "",
+    celular: "",
+    produto_ids: [] as string[],
   });
+
+  useEffect(() => {
+    loadFornecedores();
+  }, []);
+
+  const loadFornecedores = async () => {
+    try {
+      setLoading(true);
+      const data = await fornecedoresAPI.list();
+      setFornecedores(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Erro ao carregar fornecedores:", error);
+      setFornecedores([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja deletar este fornecedor?")) return;
+
+    try {
+      await fornecedoresAPI.delete(id);
+      setFornecedores(fornecedores.filter((f) => f.id !== id));
+    } catch (error) {
+      console.error("Erro ao deletar fornecedor:", error);
+      alert("Erro ao deletar fornecedor");
+    }
+  };
+
+  const handleOpenModal = (fornecedor?: Fornecedor) => {
+    if (fornecedor) {
+      setEditingFornecedor(fornecedor);
+      setFormData({
+        razao_social: fornecedor.razao_social,
+        nome_fantasia: fornecedor.nome_fantasia || "",
+        cnpj: fornecedor.cnpj,
+        email: fornecedor.email,
+        logradouro: fornecedor.logradouro,
+        num_casa: fornecedor.num_casa,
+        complemento: fornecedor.complemento || "",
+        bairro: fornecedor.bairro,
+        municipio: fornecedor.municipio,
+        uf: fornecedor.uf,
+        cep: fornecedor.cep,
+        celular: fornecedor.celular,
+        produto_ids: fornecedor.produto_ids || [],
+      });
+    } else {
+      setEditingFornecedor(null);
+      setFormData({
+        razao_social: "",
+        nome_fantasia: "",
+        cnpj: "",
+        email: "",
+        logradouro: "",
+        num_casa: "",
+        complemento: "",
+        bairro: "",
+        municipio: "",
+        uf: "",
+        cep: "",
+        celular: "",
+        produto_ids: [],
+      });
+    }
+    setModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (editingFornecedor) {
+        await fornecedoresAPI.update(editingFornecedor.id, formData);
+      } else {
+        await fornecedoresAPI.create(formData);
+      }
+      setModalOpen(false);
+      loadFornecedores();
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      alert("Erro ao salvar fornecedor");
+    }
+  };
 
   const filteredFornecedores = fornecedores.filter((fornecedor) =>
     fornecedor.razao_social.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (fornecedor.nome_fantasia?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    fornecedor.cnpj.includes(searchTerm)
+    fornecedor.nome_fantasia?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    fornecedor.cnpj?.includes(searchTerm) ||
+    fornecedor.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const columns: Column<Fornecedor>[] = [
-    { header: 'Razão Social', accessor: 'razao_social' },
-    { header: 'Nome Fantasia', accessor: (row) => row.nome_fantasia || '-' },
-    { header: 'CNPJ', accessor: 'cnpj' },
-    { header: 'Email', accessor: 'email' },
-  ];
-
-  const handleView = (fornecedor: Fornecedor) => {
-    setSelectedFornecedor(fornecedor);
-  };
-
-  const handleEdit = (fornecedor: Fornecedor) => {
-    setFormData(fornecedor);
-    setIsEditing(true);
-    setShowForm(true);
-  };
-
-  const handleCreate = () => {
-    setFormData({
-      razao_social: '',
-      nome_fantasia: '',
-      cnpj: '',
-      email: '',
-      celular: '',
-      logradouro: '',
-      num_imovel: '',
-      complemento: '',
-      bairro: '',
-      municipio: '',
-      uf: '',
-      cep: '',
-      produto_ids: [],
-    });
-    setIsEditing(false);
-    setShowForm(true);
-  };
-
-  const handleDelete = (fornecedor: Fornecedor) => {
-    if (confirm(`Deseja realmente excluir ${fornecedor.razao_social}?`)) {
-      setFornecedores(fornecedores.filter((f) => f.id !== fornecedor.id));
-      toast.success('Fornecedor excluído com sucesso!');
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isEditing && formData.id) {
-      setFornecedores(fornecedores.map((f) => (f.id === formData.id ? formData as Fornecedor : f)));
-      toast.success('Fornecedor atualizado com sucesso!');
-    } else {
-      const newFornecedor: Fornecedor = {
-        ...formData,
-        id: Date.now().toString(),
-      } as Fornecedor;
-      setFornecedores([...fornecedores, newFornecedor]);
-      toast.success('Fornecedor criado com sucesso!');
-    }
-    setShowForm(false);
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg">Carregando fornecedores...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1>Fornecedores</h1>
-          <p className="text-muted-foreground">
-            Gerencie os fornecedores
-          </p>
+          <h1 className="text-3xl font-bold">Fornecedores</h1>
+          <p className="text-muted-foreground">Gerencie os fornecedores</p>
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={() => handleOpenModal()}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Fornecedor
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Buscar fornecedor..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={filteredFornecedores}
-        onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        keyExtractor={(row) => row.id}
-      />
-
-      {/* Dialog de Visualização */}
-      <Dialog open={!!selectedFornecedor} onOpenChange={() => setSelectedFornecedor(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{selectedFornecedor?.razao_social}</DialogTitle>
-            <DialogDescription>Detalhes do fornecedor</DialogDescription>
-          </DialogHeader>
-          {selectedFornecedor && (
-            <div className="grid gap-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Razão Social</Label>
-                  <p>{selectedFornecedor.razao_social}</p>
-                </div>
-                {selectedFornecedor.nome_fantasia && (
-                  <div>
-                    <Label>Nome Fantasia</Label>
-                    <p>{selectedFornecedor.nome_fantasia}</p>
-                  </div>
-                )}
-              </div>
-              <div>
-                <Label>CNPJ</Label>
-                <p>{selectedFornecedor.cnpj}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Email</Label>
-                  <p>{selectedFornecedor.email}</p>
-                </div>
-                <div>
-                  <Label>Celular</Label>
-                  <p>{selectedFornecedor.celular}</p>
-                </div>
-              </div>
-              <div>
-                <Label>Endereço</Label>
-                <p>
-                  {selectedFornecedor.logradouro}, {selectedFornecedor.num_imovel}
-                  {selectedFornecedor.complemento && ` - ${selectedFornecedor.complemento}`}
-                </p>
-                <p>
-                  {selectedFornecedor.bairro} - {selectedFornecedor.municipio}/{selectedFornecedor.uf}
-                </p>
-                <p>CEP: {selectedFornecedor.cep}</p>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog de Criação/Edição */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{isEditing ? 'Editar' : 'Novo'} Fornecedor</DialogTitle>
-            <DialogDescription>
-              {isEditing ? 'Edite as informações' : 'Adicione um novo fornecedor'}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="razao_social">Razão Social *</Label>
-                <Input
-                  id="razao_social"
-                  value={formData.razao_social}
-                  onChange={(e) => setFormData({ ...formData, razao_social: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="nome_fantasia">Nome Fantasia</Label>
-                <Input
-                  id="nome_fantasia"
-                  value={formData.nome_fantasia}
-                  onChange={(e) => setFormData({ ...formData, nome_fantasia: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="cnpj">CNPJ *</Label>
-                <Input
-                  id="cnpj"
-                  value={formData.cnpj}
-                  onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
-                  placeholder="00.000.000/0000-00"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="celular">Telefone *</Label>
-                <Input
-                  id="celular"
-                  value={formData.celular}
-                  onChange={(e) => setFormData({ ...formData, celular: e.target.value })}
-                  placeholder="(00) 0000-0000"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="email">Email *</Label>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
+                placeholder="Buscar por nome, CNPJ ou email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
               />
             </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {filteredFornecedores.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                {searchTerm ? "Nenhum fornecedor encontrado" : "Nenhum fornecedor cadastrado"}
+              </div>
+            ) : (
+              filteredFornecedores.map((fornecedor) => (
+                <Card key={fornecedor.id}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex gap-4 flex-1">
+                        <div className="p-3 rounded-lg bg-primary/10">
+                          <Building2 className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <div>
+                            <h3 className="font-semibold text-lg">{fornecedor.razao_social}</h3>
+                            {fornecedor.nome_fantasia && (
+                              <p className="text-sm text-muted-foreground">{fornecedor.nome_fantasia}</p>
+                            )}
+                          </div>
+                          
+                          <div className="grid gap-2 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <Building2 className="h-4 w-4" />
+                              <span>CNPJ: {fornecedor.cnpj}</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-4 w-4" />
+                              <span>{fornecedor.celular}</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4" />
+                              <span>{fornecedor.email}</span>
+                            </div>
+                            
+                            <div className="text-sm">
+                              <span className="font-medium">Endereço: </span>
+                              {fornecedor.logradouro}, {fornecedor.num_casa}
+                              {fornecedor.complemento && ` - ${fornecedor.complemento}`}
+                              <br />
+                              {fornecedor.bairro} - {fornecedor.municipio}/{fornecedor.uf}
+                              <br />
+                              CEP: {fornecedor.cep}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleOpenModal(fornecedor)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(fornecedor.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-            <div className="space-y-4 border-t pt-4">
-              <h3>Endereço</h3>
+      <div className="text-sm text-muted-foreground">
+        Total: {filteredFornecedores.length} fornecedor(es)
+      </div>
+
+      {/* Modal Criar/Editar */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingFornecedor ? "Editar Fornecedor" : "Novo Fornecedor"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="cep">CEP *</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="razao_social">Razão Social*</Label>
                   <Input
-                    id="cep"
-                    value={formData.cep}
-                    onChange={(e) => setFormData({ ...formData, cep: e.target.value })}
-                    placeholder="00000-000"
+                    id="razao_social"
+                    value={formData.razao_social}
+                    onChange={(e) => setFormData({ ...formData, razao_social: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nome_fantasia">Nome Fantasia</Label>
+                  <Input
+                    id="nome_fantasia"
+                    value={formData.nome_fantasia}
+                    onChange={(e) => setFormData({ ...formData, nome_fantasia: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cnpj">CNPJ*</Label>
+                  <Input
+                    id="cnpj"
+                    value={formData.cnpj}
+                    onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email*</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
                   />
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="celular">Telefone*</Label>
+                <Input
+                  id="celular"
+                  value={formData.celular}
+                  onChange={(e) => setFormData({ ...formData, celular: e.target.value })}
+                  required
+                />
+              </div>
+
               <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2">
-                  <Label htmlFor="logradouro">Logradouro *</Label>
+                <div className="col-span-2 space-y-2">
+                  <Label htmlFor="logradouro">Logradouro*</Label>
                   <Input
                     id="logradouro"
                     value={formData.logradouro}
@@ -312,27 +313,28 @@ export default function FornecedoresPage() {
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="num_imovel">Número *</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="num_casa">Número*</Label>
                   <Input
-                    id="num_imovel"
-                    value={formData.num_imovel}
-                    onChange={(e) => setFormData({ ...formData, num_imovel: e.target.value })}
+                    id="num_casa"
+                    value={formData.num_casa}
+                    onChange={(e) => setFormData({ ...formData, num_casa: e.target.value })}
                     required
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="complemento">Complemento</Label>
-                <Input
-                  id="complemento"
-                  value={formData.complemento}
-                  onChange={(e) => setFormData({ ...formData, complemento: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="bairro">Bairro *</Label>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="complemento">Complemento</Label>
+                  <Input
+                    id="complemento"
+                    value={formData.complemento}
+                    onChange={(e) => setFormData({ ...formData, complemento: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bairro">Bairro*</Label>
                   <Input
                     id="bairro"
                     value={formData.bairro}
@@ -340,8 +342,11 @@ export default function FornecedoresPage() {
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="municipio">Município *</Label>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="municipio">Município*</Label>
                   <Input
                     id="municipio"
                     value={formData.municipio}
@@ -349,28 +354,33 @@ export default function FornecedoresPage() {
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="uf">UF *</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="uf">UF*</Label>
                   <Input
                     id="uf"
                     value={formData.uf}
-                    onChange={(e) => setFormData({ ...formData, uf: e.target.value })}
-                    placeholder="SP"
+                    onChange={(e) => setFormData({ ...formData, uf: e.target.value.toUpperCase() })}
                     maxLength={2}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cep">CEP*</Label>
+                  <Input
+                    id="cep"
+                    value={formData.cep}
+                    onChange={(e) => setFormData({ ...formData, cep: e.target.value })}
                     required
                   />
                 </div>
               </div>
             </div>
-
-            <div className="flex gap-2">
-              <Button type="submit" className="flex-1">
-                {isEditing ? 'Salvar' : 'Criar'}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setShowForm(false)} className="flex-1">
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
                 Cancelar
               </Button>
-            </div>
+              <Button type="submit">Salvar</Button>
+            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>

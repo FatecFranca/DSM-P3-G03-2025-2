@@ -1,367 +1,172 @@
 "use client";
+import { useState, useEffect } from "react";
+import { Button } from "@/src/app/components/ui/button";
+import { Input } from "@/src/app/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/src/app/components/ui/card";
+import { Plus, Search, Pencil, Trash2, Shield, User } from "lucide-react";
+import { clientesAPI } from "@/src/app/lib/api";
+import { NovoClienteModal } from "@/src/app/components/NovoClienteModal";
 
-import { useState } from 'react';
-import { Cliente } from '@/src/app/types';
-import { DataTable, Column } from '@/src/app/components/DataTable';
-import { Button } from '@/src/app/components/ui/button';
-import { Input } from '@/src/app/components/ui/input';
-import { Plus, Search } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/src/app/components/ui/dialog';
-import { Label } from '@/src/app/components/ui/label';
-import { toast } from 'sonner';
-
-// Mock data
-const mockClientes: Cliente[] = [
-  {
-    id: '1',
-    nome: 'João Silva',
-    cpf: '123.456.789-00',
-    email: 'joao@email.com',
-    celular: '(11) 98765-4321',
-    logradouro: 'Rua das Flores',
-    num_imovel: '123',
-    bairro: 'Centro',
-    municipio: 'São Paulo',
-    uf: 'SP',
-    cep: '01234-567',
-  },
-  {
-    id: '2',
-    nome: 'Maria Santos',
-    cpf: '987.654.321-00',
-    email: 'maria@email.com',
-    celular: '(11) 91234-5678',
-    logradouro: 'Av. Paulista',
-    num_imovel: '1000',
-    complemento: 'Apto 501',
-    bairro: 'Bela Vista',
-    municipio: 'São Paulo',
-    uf: 'SP',
-    cep: '01310-100',
-    data_nascimento: '1990-05-15',
-  },
-];
+interface Cliente {
+  id: string;
+  nome: string;
+  email: string;
+  cpf?: string;
+  celular?: string;
+  admin: boolean;
+  mesa_id?: string;
+}
 
 export default function ClientesPage() {
-  const [clientes, setClientes] = useState<Cliente[]>(mockClientes);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<Partial<Cliente>>({
-    nome: '',
-    cpf: '',
-    email: '',
-    celular: '',
-    logradouro: '',
-    num_imovel: '',
-    complemento: '',
-    bairro: '',
-    municipio: '',
-    uf: '',
-    cep: '',
-    data_nascimento: '',
-  });
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    loadClientes();
+  }, []);
+
+  const loadClientes = async () => {
+    try {
+      setLoading(true);
+      const data = await clientesAPI.list();
+      setClientes(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Erro ao carregar clientes:", error);
+      setClientes([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja deletar este cliente?")) return;
+
+    try {
+      await clientesAPI.delete(id);
+      setClientes(clientes.filter((c) => c.id !== id));
+    } catch (error) {
+      console.error("Erro ao deletar cliente:", error);
+      alert("Erro ao deletar cliente");
+    }
+  };
+
+  const handleNovoCliente = () => {
+    setModalOpen(true);
+  };
+
+  const handleNovoClienteSuccess = () => {
+    // Recarregar lista de clientes
+    loadClientes();
+  };
 
   const filteredClientes = clientes.filter((cliente) =>
     cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.cpf.includes(searchTerm) ||
-    cliente.email.toLowerCase().includes(searchTerm.toLowerCase())
+    cliente.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cliente.cpf?.includes(searchTerm)
   );
 
-  const columns: Column<Cliente>[] = [
-    { header: 'Nome', accessor: 'nome' },
-    { header: 'CPF', accessor: 'cpf' },
-    { header: 'Email', accessor: 'email' },
-    { header: 'Celular', accessor: 'celular' },
-  ];
-
-  const handleView = (cliente: Cliente) => {
-    setSelectedCliente(cliente);
-  };
-
-  const handleEdit = (cliente: Cliente) => {
-    setFormData(cliente);
-    setIsEditing(true);
-    setShowForm(true);
-  };
-
-  const handleCreate = () => {
-    setFormData({
-      nome: '',
-      cpf: '',
-      email: '',
-      celular: '',
-      logradouro: '',
-      num_imovel: '',
-      complemento: '',
-      bairro: '',
-      municipio: '',
-      uf: '',
-      cep: '',
-      data_nascimento: '',
-    });
-    setIsEditing(false);
-    setShowForm(true);
-  };
-
-  const handleDelete = (cliente: Cliente) => {
-    if (confirm(`Deseja realmente excluir ${cliente.nome}?`)) {
-      setClientes(clientes.filter((c) => c.id !== cliente.id));
-      toast.success('Cliente excluído com sucesso!');
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isEditing && formData.id) {
-      setClientes(clientes.map((c) => (c.id === formData.id ? formData as Cliente : c)));
-      toast.success('Cliente atualizado com sucesso!');
-    } else {
-      const newCliente: Cliente = {
-        ...formData,
-        id: Date.now().toString(),
-      } as Cliente;
-      setClientes([...clientes, newCliente]);
-      toast.success('Cliente criado com sucesso!');
-    }
-    setShowForm(false);
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg">Carregando clientes...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1>Clientes</h1>
-          <p className="text-muted-foreground">
-            Gerencie o cadastro de clientes
-          </p>
+          <h1 className="text-3xl font-bold">Clientes</h1>
+          <p className="text-muted-foreground">Gerencie os clientes do sistema</p>
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={handleNovoCliente}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Cliente
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Buscar cliente..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome, email ou CPF..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {filteredClientes.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                {searchTerm ? "Nenhum cliente encontrado" : "Nenhum cliente cadastrado"}
+              </div>
+            ) : (
+              filteredClientes.map((cliente) => (
+                <div
+                  key={cliente.id}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`p-2 rounded-full ${cliente.admin ? 'bg-purple-100' : 'bg-blue-100'}`}>
+                      {cliente.admin ? (
+                        <Shield className="h-5 w-5 text-purple-600" />
+                      ) : (
+                        <User className="h-5 w-5 text-blue-600" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{cliente.nome}</h3>
+                        {cliente.admin && (
+                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
+                            Admin
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        <p>{cliente.email}</p>
+                        {cliente.cpf && <p>CPF: {cliente.cpf}</p>}
+                        {cliente.celular && <p>Tel: {cliente.celular}</p>}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(cliente.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="text-sm text-muted-foreground">
+        Total: {filteredClientes.length} cliente(s)
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredClientes}
-        onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        keyExtractor={(row) => row.id}
+      {/* Modal Novo Cliente */}
+      <NovoClienteModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSuccess={handleNovoClienteSuccess}
       />
-
-      {/* Dialog de Visualização */}
-      <Dialog open={!!selectedCliente} onOpenChange={() => setSelectedCliente(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{selectedCliente?.nome}</DialogTitle>
-            <DialogDescription>Detalhes do cliente</DialogDescription>
-          </DialogHeader>
-          {selectedCliente && (
-            <div className="grid gap-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>CPF</Label>
-                  <p>{selectedCliente.cpf}</p>
-                </div>
-                {selectedCliente.data_nascimento && (
-                  <div>
-                    <Label>Data de Nascimento</Label>
-                    <p>{new Date(selectedCliente.data_nascimento).toLocaleDateString('pt-BR')}</p>
-                  </div>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Email</Label>
-                  <p>{selectedCliente.email}</p>
-                </div>
-                <div>
-                  <Label>Celular</Label>
-                  <p>{selectedCliente.celular}</p>
-                </div>
-              </div>
-              <div>
-                <Label>Endereço</Label>
-                <p>
-                  {selectedCliente.logradouro}, {selectedCliente.num_imovel}
-                  {selectedCliente.complemento && ` - ${selectedCliente.complemento}`}
-                </p>
-                <p>
-                  {selectedCliente.bairro} - {selectedCliente.municipio}/{selectedCliente.uf}
-                </p>
-                <p>CEP: {selectedCliente.cep}</p>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog de Criação/Edição */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{isEditing ? 'Editar' : 'Novo'} Cliente</DialogTitle>
-            <DialogDescription>
-              {isEditing ? 'Edite as informações' : 'Adicione um novo cliente'}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <Label htmlFor="nome">Nome Completo *</Label>
-                <Input
-                  id="nome"
-                  value={formData.nome}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="cpf">CPF *</Label>
-                <Input
-                  id="cpf"
-                  value={formData.cpf}
-                  onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
-                  placeholder="000.000.000-00"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="data_nascimento">Data de Nascimento</Label>
-                <Input
-                  id="data_nascimento"
-                  type="date"
-                  value={formData.data_nascimento}
-                  onChange={(e) => setFormData({ ...formData, data_nascimento: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="celular">Celular *</Label>
-                <Input
-                  id="celular"
-                  value={formData.celular}
-                  onChange={(e) => setFormData({ ...formData, celular: e.target.value })}
-                  placeholder="(00) 00000-0000"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4 border-t pt-4">
-              <h3>Endereço</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="cep">CEP *</Label>
-                  <Input
-                    id="cep"
-                    value={formData.cep}
-                    onChange={(e) => setFormData({ ...formData, cep: e.target.value })}
-                    placeholder="00000-000"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2">
-                  <Label htmlFor="logradouro">Logradouro *</Label>
-                  <Input
-                    id="logradouro"
-                    value={formData.logradouro}
-                    onChange={(e) => setFormData({ ...formData, logradouro: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="num_imovel">Número *</Label>
-                  <Input
-                    id="num_imovel"
-                    value={formData.num_imovel}
-                    onChange={(e) => setFormData({ ...formData, num_imovel: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="complemento">Complemento</Label>
-                <Input
-                  id="complemento"
-                  value={formData.complemento}
-                  onChange={(e) => setFormData({ ...formData, complemento: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="bairro">Bairro *</Label>
-                  <Input
-                    id="bairro"
-                    value={formData.bairro}
-                    onChange={(e) => setFormData({ ...formData, bairro: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="municipio">Município *</Label>
-                  <Input
-                    id="municipio"
-                    value={formData.municipio}
-                    onChange={(e) => setFormData({ ...formData, municipio: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="uf">UF *</Label>
-                  <Input
-                    id="uf"
-                    value={formData.uf}
-                    onChange={(e) => setFormData({ ...formData, uf: e.target.value })}
-                    placeholder="SP"
-                    maxLength={2}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Button type="submit" className="flex-1">
-                {isEditing ? 'Salvar' : 'Criar'}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setShowForm(false)} className="flex-1">
-                Cancelar
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

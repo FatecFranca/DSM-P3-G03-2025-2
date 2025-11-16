@@ -23,15 +23,17 @@ interface NavItem {
   icon: React.ReactNode;
   href: string;
   adminOnly?: boolean;
+  garcomOnly?: boolean;
 }
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const { isAdmin } = useAuth();
+  const { isAdmin, isGarcom } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   const navItems: NavItem[] = [
+    // Rotas exclusivas do Admin
     { name: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" />, href: '/admin/dashboard', adminOnly: true },
     { name: 'Mesas', icon: <UtensilsCrossed className="h-5 w-5" />, href: '/admin/mesas', adminOnly: true },
     { name: 'Pedidos', icon: <ShoppingCart className="h-5 w-5" />, href: '/admin/pedidos', adminOnly: true },
@@ -41,11 +43,22 @@ export function Sidebar() {
     { name: 'Clientes', icon: <Users className="h-5 w-5" />, href: '/admin/clientes', adminOnly: true },
     { name: 'Garçons', icon: <UserCog className="h-5 w-5" />, href: '/admin/garcons', adminOnly: true },
     { name: 'Relatórios', icon: <BarChart3 className="h-5 w-5" />, href: '/admin/relatorios', adminOnly: true },
-    { name: 'Mesas', icon: <UtensilsCrossed className="h-5 w-5" />, href: '/garcom/mesas' },
-    { name: 'Pedidos', icon: <ShoppingCart className="h-5 w-5" />, href: '/garcom/pedidos'},
+
+    // Rotas exclusivas do Garçom
+    { name: 'Mesas', icon: <UtensilsCrossed className="h-5 w-5" />, href: '/garcom/mesas', garcomOnly: true },
+    { name: 'Pedidos', icon: <ShoppingCart className="h-5 w-5" />, href: '/garcom/pedidos', garcomOnly: true },
   ];
 
-  const filteredItems = navItems.filter((item) => !item.adminOnly || isAdmin);
+  const filteredItems = navItems.filter((item) => {
+    // Se é adminOnly, só admin pode ver
+    if (item.adminOnly) return isAdmin;
+    
+    // Se é garcomOnly, só garçom pode ver
+    if (item.garcomOnly) return isGarcom;
+    
+    // Se não tem restrição, todos autenticados veem
+    return true;
+  });
 
   const handleNavigate = (href: string) => {
     router.push(href);

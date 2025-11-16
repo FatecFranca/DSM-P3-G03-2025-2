@@ -1,144 +1,197 @@
 "use client";
-import { useState } from 'react';
-import { Categoria } from '@/src/app/types';
-import { DataTable, Column } from '@/src/app/components/DataTable';
-import { Button } from '@/src/app/components/ui/button';
-import { Input } from '@/src/app/components/ui/input';
-import { Plus, Search } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Button } from "@/src/app/components/ui/button";
+import { Input } from "@/src/app/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/src/app/components/ui/card";
+import { Plus, Search, Pencil, Trash2, Tag } from "lucide-react";
+import { categoriasAPI } from "@/src/app/lib/api";
+import { Categoria } from "@/src/app/types";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/src/app/components/ui/dialog';
-import { Label } from '@/src/app/components/ui/label';
-import { toast } from 'sonner';
-
-// Mock data
-const mockCategorias: Categoria[] = [
-  { id: '1', descricao: 'Bebidas' },
-  { id: '2', descricao: 'Lanches' },
-  { id: '3', descricao: 'Sobremesas' },
-  { id: '4', descricao: 'Pratos Principais' },
-  { id: '5', descricao: 'Entradas' },
-];
+  DialogFooter,
+} from "@/src/app/components/ui/dialog";
+import { Label } from "@/src/app/components/ui/label";
 
 export default function CategoriasPage() {
-  const [categorias, setCategorias] = useState<Categoria[]>(mockCategorias);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showForm, setShowForm] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<Partial<Categoria>>({
-    descricao: '',
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingCategoria, setEditingCategoria] = useState<Categoria | null>(null);
+  const [formData, setFormData] = useState({
+    descricao: "",
   });
 
-  const filteredCategorias = categorias.filter((categoria) =>
-    categoria.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    loadCategorias();
+  }, []);
+
+  const loadCategorias = async () => {
+    try {
+      setLoading(true);
+      const data = await categoriasAPI.list();
+      setCategorias(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Erro ao carregar categorias:", error);
+      setCategorias([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja deletar?")) return;
+
+    try {
+      await categoriasAPI.delete(id);
+      setCategorias(categorias.filter((c) => c.id !== id));
+    } catch (error) {
+      console.error("Erro ao deletar:", error);
+      alert("Erro ao deletar");
+    }
+  };
+
+  const handleOpenModal = (categoria?: Categoria) => {
+    if (categoria) {
+      setEditingCategoria(categoria);
+      setFormData({
+        descricao: categoria.descricao,
+      });
+    } else {
+      setEditingCategoria(null);
+      setFormData({
+        descricao: "",
+      });
+    }
+    setModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (editingCategoria) {
+        await categoriasAPI.update(editingCategoria.id, formData);
+      } else {
+        await categoriasAPI.create(formData);
+      }
+      setModalOpen(false);
+      loadCategorias();
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      alert("Erro ao salvar categoria");
+    }
+  };
+
+  const filteredCategorias = categorias.filter((item) =>
+    item.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const columns: Column<Categoria>[] = [
-    { header: 'ID', accessor: 'id', className: 'w-[100px]' },
-    { header: 'Descrição', accessor: 'descricao' },
-  ];
-
-  const handleEdit = (categoria: Categoria) => {
-    setFormData(categoria);
-    setIsEditing(true);
-    setShowForm(true);
-  };
-
-  const handleCreate = () => {
-    setFormData({ descricao: '' });
-    setIsEditing(false);
-    setShowForm(true);
-  };
-
-  const handleDelete = (categoria: Categoria) => {
-    if (confirm(`Deseja realmente excluir a categoria "${categoria.descricao}"?`)) {
-      setCategorias(categorias.filter((c) => c.id !== categoria.id));
-      toast.success('Categoria excluída com sucesso!');
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isEditing && formData.id) {
-      setCategorias(categorias.map((c) => (c.id === formData.id ? formData as Categoria : c)));
-      toast.success('Categoria atualizada com sucesso!');
-    } else {
-      const newCategoria: Categoria = {
-        ...formData,
-        id: Date.now().toString(),
-      } as Categoria;
-      setCategorias([...categorias, newCategoria]);
-      toast.success('Categoria criada com sucesso!');
-    }
-    setShowForm(false);
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg">Carregando...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1>Categorias</h1>
-          <p className="text-muted-foreground">
-            Gerencie as categorias de produtos
-          </p>
+          <h1 className="text-3xl font-bold">Categorias</h1>
+          <p className="text-muted-foreground">Gerencie as categorias de produtos</p>
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={() => handleOpenModal()}>
           <Plus className="mr-2 h-4 w-4" />
           Nova Categoria
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Buscar categoria..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={filteredCategorias}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        keyExtractor={(row) => row.id}
-      />
-
-      {/* Dialog de Criação/Edição */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{isEditing ? 'Editar' : 'Nova'} Categoria</DialogTitle>
-            <DialogDescription>
-              {isEditing ? 'Edite as informações' : 'Adicione uma nova categoria'}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="descricao">Descrição *</Label>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                id="descricao"
-                value={formData.descricao}
-                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                placeholder="Ex: Bebidas, Lanches, Sobremesas..."
-                required
+                placeholder="Buscar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
               />
             </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredCategorias.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                {searchTerm ? "Nenhum resultado encontrado" : "Nenhum registro cadastrado"}
+              </div>
+            ) : (
+              filteredCategorias.map((item) => (
+                <Card key={item.id}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="p-3 rounded-lg bg-primary/10">
+                        <Tag className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => handleOpenModal(item)}>
+          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <h3 className="font-semibold text-lg">{item.descricao}</h3>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-            <div className="flex gap-2">
-              <Button type="submit" className="flex-1">
-                {isEditing ? 'Salvar' : 'Criar'}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setShowForm(false)} className="flex-1">
+      <div className="text-sm text-muted-foreground">
+        Total: {filteredCategorias.length} registro(s)
+      </div>
+
+      {/* Modal Criar/Editar */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingCategoria ? "Editar Categoria" : "Nova Categoria"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="descricao">Descrição*</Label>
+                <Input
+                  id="descricao"
+                  value={formData.descricao}
+                  onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                  placeholder="Ex: Bebidas, Pratos Principais, Sobremesas..."
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
                 Cancelar
               </Button>
-            </div>
+              <Button type="submit">Salvar</Button>
+            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>

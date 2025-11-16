@@ -1,42 +1,35 @@
-import express, { json, urlencoded } from 'express'
-import cookieParser from 'cookie-parser'
-import logger from 'morgan'
-
-import indexRouter from './routes/index.js'
-import usersRouter from './routes/users.js'
+import express from 'express'
+import cors from 'cors'
+import routes from './routes/index.js' // Correto
 
 const app = express()
 
-app.use(logger('dev'))
-app.use(json())
-app.use(urlencoded({ extended: false }))
-app.use(cookieParser())
+// Configuração CORS
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
 
-app.use('/', indexRouter)
-app.use('/users', usersRouter)
+app.use(cors(corsOptions))
 
+// Middleware para parsing de JSON
+app.use(express.json())
 
-/******************** ROTAS ********************/
-import categoriasRouter from './routes/categorias.js'
-app.use('/categorias', categoriasRouter)
+// Rotas
+app.use(routes)
 
-import produtosRouter from './routes/produtos.js'
-app.use('/produtos', produtosRouter)
+// Rota de teste
+app.get('/', (req, res) => {
+  res.json({ message: 'API funcionando!' })
+})
 
-import clientesRouter from './routes/clientes.js'
-app.use('/clientes', clientesRouter)
-
-import fornecedoresRouter from './routes/fornecedores.js'
-app.use('/fornecedores',  fornecedoresRouter)
-
-import pedidosRouter from './routes/pedidos.js'
-app.use('/pedidos',  pedidosRouter)
-
-import mesasRouter from './routes/mesas.js'
-app.use('/mesas' , mesasRouter)
-
-import garcomRouter from './routes/garcom.js'
-app.use('/garcons' , garcomRouter)
-/***********************************************/
+// Tratamento de erros
+app.use((err, req, res, next) => {
+  console.error(err.stack)
+  res.status(500).json({ error: 'Erro interno do servidor' })
+})
 
 export default app

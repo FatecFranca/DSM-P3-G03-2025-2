@@ -1,938 +1,347 @@
 "use client";
+import { useState, useEffect } from "react";
+import { Button } from "@/src/app/components/ui/button";
+import { Input } from "@/src/app/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/src/app/components/ui/card";
+import { Search, Eye, Clock, CheckCircle, XCircle, Package } from "lucide-react";
+import { pedidosAPI } from "@/src/app/lib/api";
 
-import { useState, useEffect } from 'react';
-import { Pedido, ItemPedido, Produto, Mesa, Garcom, PedidoStatus } from '@/src/app/types';
-import { Button } from '@/src/app/components/ui/button';
-import { Input } from '@/src/app/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/app/components/ui/card';
-import { Badge } from '@/src/app/components/ui/badge';
-import { Separator } from '@/src/app/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/app/components/ui/select';
-import { Label } from '@/src/app/components/ui/label';
-import { StatusBadge } from '@/src/app/components/StatusBadge';
-import { MetricCard } from '@/src/app/components/MetricCard';
-import { 
-  Plus, 
-  Search, 
-  Clock, 
-  Users, 
-  ChefHat, 
-  DollarSign, 
-  Eye, 
-  Trash2, 
-  ShoppingCart,
-  Calendar,
-  Timer,
-  User as UserIcon,
-  Package,
-  Edit,
-  Check,
-  X,
-  AlertCircle,
-  TrendingUp
-} from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/src/app/components/ui/dialog';
-import { toast } from 'sonner';
-import {
-  Alert,
-  AlertDescription,
-} from '@/src/app/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/app/components/ui/tabs';
+interface Pedido {
+  id: string;
+  num_pedido: number;
+  mesa_id: string;
+  data_hora: string;
+  valor: number;
+  status_preparo?: string; // Status de preparação/entrega: aguardando, em_preparo, pronto, entregue
+  pagamento: string; // "pago" (default)
+  garcom_id?: string;
+  mesa?: {
+    id: string;
+    numero: number;
+    numero_mesa: number;
+    capacidade: number;
+    status: string;
+    total: number;
+  };
+  itens?: ItemPedido[];
+}
 
-// Mock data expandido com interfaces corretas
-// ✅ Mock data corrigido com propriedades obrigatórias
-const mockPedidos: Pedido[] = [
-  {
-    id: '1',
-    num_pedido: 'PED001',
-    data_hora: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 min atrás
-    mesa_id: '1',
-    mesa: { id: '1', numero: 1, capacidade: 4, status: 'Ocupada', created_at: '', updated_at: '' },
-    garcom_id: '1',
-    garcom: { 
-      id: '1', 
-      nome: 'João Silva', 
-      cpf: '123.456.789-00',
-      email: 'joao@restaurantsys.com',
-      celular: '(11) 99999-1111',
-      turno: 'Manhã',
-      ativo: true
-    },
-    status: 'Em andamento',
-    total: 125.50,
-    itens: [
-      { 
-        id: '1',
-        num_item: 1,
-        pedido_id: '1', 
-        produto_id: '1', 
-        quantidade: 2,
-        subtotal: 59.90,
-        observacoes: 'Bem passado'
-      },
-      { 
-        id: '2',
-        num_item: 2,
-        pedido_id: '1', 
-        produto_id: '2', 
-        quantidade: 3,
-        subtotal: 75.00,
-        observacoes: ''
-      },
-    ],
-  },
-  {
-    id: '2',
-    num_pedido: 'PED002',
-    data_hora: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 min atrás
-    mesa_id: '3',
-    mesa: { id: '3', numero: 3, capacidade: 6, status: 'Ocupada', created_at: '', updated_at: '' },
-    garcom_id: '2',
-    garcom: { 
-      id: '2', 
-      nome: 'Maria Santos', 
-      cpf: '987.654.321-00',
-      email: 'maria@restaurantsys.com',
-      celular: '(11) 99999-2222',
-      turno: 'Tarde',
-      ativo: true
-    },
-    status: 'Pendente',
-    total: 89.90,
-    itens: [
-      { 
-        id: '3',
-        num_item: 1,
-        pedido_id: '2', 
-        produto_id: '3', 
-        quantidade: 2,
-        subtotal: 30.00
-      },
-      { 
-        id: '4',
-        num_item: 2,
-        pedido_id: '2', 
-        produto_id: '1', 
-        quantidade: 2,
-        subtotal: 59.90
-      },
-    ],
-  },
-  {
-    id: '3',
-    num_pedido: 'PED003',
-    data_hora: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 min atrás
-    mesa_id: '2',
-    mesa: { id: '2', numero: 2, capacidade: 2, status: 'Ocupada', created_at: '', updated_at: '' },
-    garcom_id: '1',
-    garcom: { 
-      id: '1', 
-      nome: 'João Silva', 
-      cpf: '123.456.789-00',
-      email: 'joao@restaurantsys.com',
-      celular: '(11) 99999-1111',
-      turno: 'Manhã',
-      ativo: true
-    },
-    status: 'Concluído',
-    total: 45.00,
-    itens: [
-      { 
-        id: '5',
-        num_item: 1,
-        pedido_id: '3', 
-        produto_id: '2', 
-        quantidade: 1,
-        subtotal: 25.00
-      },
-      { 
-        id: '6',
-        num_item: 2,
-        pedido_id: '3', 
-        produto_id: '4', 
-        quantidade: 2,
-        subtotal: 20.00
-      },
-    ],
-  },
-  {
-    id: '4',
-    num_pedido: 'PED004',
-    data_hora: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1h atrás
-    mesa_id: '4',
-    mesa: { id: '4', numero: 4, capacidade: 4, status: 'Disponível', created_at: '', updated_at: '' },
-    garcom_id: '2',
-    garcom: { 
-      id: '2', 
-      nome: 'Maria Santos', 
-      cpf: '987.654.321-00',
-      email: 'maria@restaurantsys.com',
-      celular: '(11) 99999-2222',
-      turno: 'Tarde',
-      ativo: true
-    },
-    status: 'Concluído',
-    total: 178.50,
-    itens: [
-      { 
-        id: '7',
-        num_item: 1,
-        pedido_id: '4', 
-        produto_id: '1', 
-        quantidade: 3,
-        subtotal: 89.85
-      },
-      { 
-        id: '8',
-        num_item: 2,
-        pedido_id: '4', 
-        produto_id: '3', 
-        quantidade: 4,
-        subtotal: 60.00
-      },
-      { 
-        id: '9',
-        num_item: 3,
-        pedido_id: '4', 
-        produto_id: '4', 
-        quantidade: 3,
-        subtotal: 28.65
-      },
-    ],
-  },
-];
-
-const mockProdutos: Produto[] = [
-  { 
-    id: '1', 
-    nome: 'Hambúrguer Artesanal', 
-    marca: 'Casa',
-    detalhes: 'Hambúrguer 180g com bacon e queijo',
-    quantidade: 1,
-    unidade_medida: 'UN',
-    preco_unitario: 29.95, 
-    qtd_estoque: 50,
-    categoria_id: '1',
-    fornecedor_ids: ['1']
-  },
-  { 
-    id: '2', 
-    nome: 'Pizza Margherita', 
-    marca: 'Casa',
-    detalhes: 'Pizza tradicional italiana com molho de tomate e manjericão',
-    quantidade: 1,
-    unidade_medida: 'UN',
-    preco_unitario: 25.00, 
-    qtd_estoque: 30,
-    categoria_id: '2',
-    fornecedor_ids: ['1']
-  },
-  { 
-    id: '3', 
-    nome: 'Batata Frita Grande', 
-    marca: 'Casa',
-    detalhes: 'Porção generosa de batatas fritas crocantes',
-    quantidade: 1,
-    unidade_medida: 'UN',
-    preco_unitario: 15.00, 
-    qtd_estoque: 100,
-    categoria_id: '1',
-    fornecedor_ids: ['2']
-  },
-  { 
-    id: '4', 
-    nome: 'Refrigerante Lata', 
-    marca: 'Coca-Cola',
-    detalhes: 'Bebida gelada 350ml',
-    quantidade: 1,
-    unidade_medida: 'UN',
-    preco_unitario: 8.00, 
-    qtd_estoque: 200,
-    categoria_id: '3',
-    fornecedor_ids: ['3']
-  },
-];
-
-const mockMesas: Mesa[] = [
-  { id: '1', numero: 1, capacidade: 4, status: 'Ocupada', created_at: '', updated_at: '' },
-  { id: '2', numero: 2, capacidade: 2, status: 'Ocupada', created_at: '', updated_at: '' },
-  { id: '3', numero: 3, capacidade: 6, status: 'Ocupada', created_at: '', updated_at: '' },
-  { id: '4', numero: 4, capacidade: 4, status: 'Disponível', created_at: '', updated_at: '' },
-  { id: '5', numero: 5, capacidade: 8, status: 'Disponível', created_at: '', updated_at: '' },
-];
-
-const mockGarcons: Garcom[] = [
-  { 
-    id: '1', 
-    nome: 'João Silva', 
-    cpf: '123.456.789-00',
-    email: 'joao@restaurantsys.com',
-    celular: '(11) 99999-1111',
-    turno: 'Manhã',
-    ativo: true
-  },
-  { 
-    id: '2', 
-    nome: 'Maria Santos', 
-    cpf: '987.654.321-00',
-    email: 'maria@restaurantsys.com',
-    celular: '(11) 99999-2222',
-    turno: 'Tarde',
-    ativo: true
-  },
-];
+interface ItemPedido {
+  id: string;
+  num_item: number;
+  quantidade: number;
+  produto_id: string;
+  produto?: {
+    id: string;
+    nome: string;
+    preco_unitario: number;
+    marca: string;
+  };
+}
 
 export default function PedidosPage() {
-  const [pedidos, setPedidos] = useState<Pedido[]>(mockPedidos);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  // ✅ Removido garcom_id do formData
-  const [formData, setFormData] = useState({
-    mesa_id: '',
-    observacoes: '',
-    itens: [] as { produto_id: string; quantidade: number; observacoes?: string }[],
-  });
-  const [currentItem, setCurrentItem] = useState({ 
-    produto_id: '', 
-    quantidade: '1', 
-    observacoes: '' 
-  });
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("todos");
 
-  // Atualizar pedidos a cada minuto para simular tempo real
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPedidos(prevPedidos => 
-        prevPedidos.map(pedido => ({
-          ...pedido,
-          // Simulando atualização timestamp se necessário
-        }))
-      );
-    }, 60000);
-
-    return () => clearInterval(interval);
+    loadPedidos();
   }, []);
 
-  const filteredPedidos = pedidos.filter((pedido) => {
-    const matchesSearch = 
-      pedido.num_pedido.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      `mesa ${pedido.mesa_id}`.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || pedido.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  // Função para calcular tempo decorrido
-  const getTempoDecorrido = (dataHora: string) => {
-    const diff = Date.now() - new Date(dataHora).getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    
-    if (hours > 0) {
-      return `${hours}h ${minutes % 60}min`;
-    }
-    return `${minutes}min`;
-  };
-
-  // ✅ Função para obter cor do status (CORRIGIDA)
-  const getStatusColor = (status: PedidoStatus | undefined) => {
-    if (!status) return 'bg-gray-100 text-gray-800 border-gray-200';
-    
-    switch (status) {
-      case 'Pendente': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Em andamento': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Concluído': return 'bg-green-100 text-green-800 border-green-200';
-      case 'Cancelado': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  const loadPedidos = async () => {
+    try {
+      setLoading(true);
+      console.log('📦 Carregando pedidos...');
+      const data = await pedidosAPI.list({ include: 'mesa,itens.produto' }) as Pedido[];
+      console.log('✅ Pedidos carregados:', data.length);
+      setPedidos(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("❌ Erro ao carregar pedidos:", error);
+      setPedidos([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ✅ Função para obter ícone do status (CORRIGIDA)
-  const getStatusIcon = (status: PedidoStatus | undefined) => {
-    if (!status) return <AlertCircle className="h-4 w-4" />;
-    
-    switch (status) {
-      case 'Pendente': return <Clock className="h-4 w-4" />;
-      case 'Em andamento': return <ChefHat className="h-4 w-4" />;
-      case 'Concluído': return <Check className="h-4 w-4" />;
-      case 'Cancelado': return <X className="h-4 w-4" />;
-      default: return <AlertCircle className="h-4 w-4" />;
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      await pedidosAPI.update(id, { status_preparo: newStatus });
+      setPedidos(pedidos.map(p => p.id === id ? { ...p, status_preparo: newStatus } : p));
+      console.log(`✅ Status do pedido atualizado para: ${newStatus}`);
+    } catch (error) {
+      console.error("❌ Erro ao atualizar status:", error);
+      alert("Erro ao atualizar status do pedido");
     }
   };
 
-  const handleView = (pedido: Pedido) => {
-    setSelectedPedido(pedido);
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
   };
 
-  const handleCreate = () => {
-    // ✅ Removido garcom_id do reset do formData
-    setFormData({ mesa_id: '', observacoes: '', itens: [] });
-    setCurrentItem({ produto_id: '', quantidade: '1', observacoes: '' });
-    setShowForm(true);
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('pt-BR');
   };
 
-  const handleAddItem = () => {
-    if (currentItem.produto_id && parseInt(currentItem.quantidade) > 0) {
-      setFormData({
-        ...formData,
-        itens: [...formData.itens, { 
-          produto_id: currentItem.produto_id, 
-          quantidade: parseInt(currentItem.quantidade),
-          observacoes: currentItem.observacoes
-        }],
-      });
-      setCurrentItem({ produto_id: '', quantidade: '1', observacoes: '' });
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'aguardando':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'em_preparo':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'pronto':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'entregue':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+      case 'cancelado':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
     }
   };
 
-  const handleRemoveItem = (index: number) => {
-    setFormData({
-      ...formData,
-      itens: formData.itens.filter((_, i) => i !== index),
-    });
-  };
-
-  const calculateTotal = () => {
-    return formData.itens.reduce((total, item) => {
-      const produto = mockProdutos.find(p => p.id === item.produto_id);
-      return total + (produto?.preco_unitario || 0) * item.quantidade;
-    }, 0);
-  };
-
-  // ✅ Função handleSubmit sem garçom
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (formData.itens.length === 0) {
-      toast.error('Adicione pelo menos um item ao pedido');
-      return;
+  const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'aguardando':
+        return <Clock className="h-4 w-4" />;
+      case 'em_preparo':
+        return <Package className="h-4 w-4" />;
+      case 'pronto':
+        return <CheckCircle className="h-4 w-4" />;
+      case 'entregue':
+        return <CheckCircle className="h-4 w-4" />;
+      case 'cancelado':
+        return <XCircle className="h-4 w-4" />;
+      default:
+        return <Clock className="h-4 w-4" />;
     }
-
-    // Buscar apenas mesa selecionada
-    const mesaSelecionada = mockMesas.find(m => m.id === formData.mesa_id);
-
-    const newPedido: Pedido = {
-      id: Date.now().toString(),
-      num_pedido: `PED${String(pedidos.length + 1).padStart(3, '0')}`,
-      data_hora: new Date().toISOString(),
-      mesa_id: formData.mesa_id,
-      mesa: mesaSelecionada!, // ✅ Propriedade obrigatória
-      garcom_id: '', // ✅ Campo vazio para garçom
-      garcom: undefined, // ✅ Sem garçom atribuído
-      status: 'Pendente',
-      total: calculateTotal(),
-      itens: formData.itens.map((item, index) => {
-        const produto = mockProdutos.find(p => p.id === item.produto_id);
-        return {
-          id: `${Date.now()}-${index}`,
-          num_item: index + 1,
-          pedido_id: Date.now().toString(),
-          produto_id: item.produto_id,
-          quantidade: item.quantidade,
-          subtotal: (produto?.preco_unitario || 0) * item.quantidade,
-          observacoes: item.observacoes,
-        };
-      }),
-    };
-    
-    setPedidos([newPedido, ...pedidos]);
-    setShowForm(false);
-    toast.success(`Pedido ${newPedido.num_pedido} criado com sucesso!`);
   };
 
-  const updatePedidoStatus = (pedidoId: string, novoStatus: PedidoStatus) => {
-    setPedidos(prevPedidos =>
-      prevPedidos.map(pedido =>
-        pedido.id === pedidoId
-          ? { ...pedido, status: novoStatus }
-          : pedido
-      )
-    );
-    toast.success(`Status atualizado para: ${novoStatus}`);
+  const getStatusLabel = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'aguardando':
+        return 'Aguardando';
+      case 'em_preparo':
+        return 'Em Preparo';
+      case 'pronto':
+        return 'Pronto';
+      case 'entregue':
+        return 'Entregue';
+      case 'cancelado':
+        return 'Cancelado';
+      default:
+        return status;
+    }
   };
 
-  // ✅ Estatísticas (CORRIGIDAS com verificação de status)
+  const filteredPedidos = pedidos
+    .filter((pedido) => {
+      const matchSearch = 
+        pedido.num_pedido.toString().includes(searchTerm) ||
+        pedido.mesa?.numero_mesa.toString().includes(searchTerm) ||
+        pedido.id.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchStatus = statusFilter === "todos" || (pedido.status_preparo || 'aguardando').toLowerCase() === statusFilter;
+      
+      return matchSearch && matchStatus;
+    })
+    .sort((a, b) => new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime());
+
   const stats = {
     total: pedidos.length,
-    pendente: pedidos.filter(p => p.status === 'Pendente').length,
-    andamento: pedidos.filter(p => p.status === 'Em andamento').length,
-    concluido: pedidos.filter(p => p.status === 'Concluído').length,
-    cancelado: pedidos.filter(p => p.status === 'Cancelado').length,
-    totalVendas: pedidos.reduce((sum, p) => sum + (p.total || 0), 0),
+    aguardando: pedidos.filter(p => (p.status_preparo || 'aguardando').toLowerCase() === 'aguardando').length,
+    emPreparo: pedidos.filter(p => (p.status_preparo || 'aguardando').toLowerCase() === 'em_preparo').length,
+    prontos: pedidos.filter(p => (p.status_preparo || 'aguardando').toLowerCase() === 'pronto').length,
+    valorTotal: pedidos.reduce((sum, p) => sum + p.valor, 0),
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg">Carregando pedidos...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gestão de Pedidos</h1>
-          <p className="text-muted-foreground">
-            Monitore e gerencie todos os pedidos em tempo real
-          </p>
+          <h1 className="text-3xl font-bold">Pedidos</h1>
+          <p className="text-muted-foreground">Gerencie todos os pedidos</p>
         </div>
-        <Button onClick={handleCreate} size="lg">
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Pedido
-        </Button>
       </div>
 
-      {/* Métricas */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Total de Pedidos"
-          value={stats.total.toString()}
-          icon={ShoppingCart}
-        />
-        <MetricCard
-          title="Pendentes"
-          value={stats.pendente.toString()}
-          icon={Clock}
-        />
-        <MetricCard
-          title="Em Andamento"
-          value={stats.andamento.toString()}
-          icon={ChefHat}
-        />
-        <MetricCard
-          title="Vendas Hoje"
-          value={`R$ ${stats.totalVendas.toFixed(2)}`}
-          icon={DollarSign}
-        />
-      </div>
-
-      {/* Filtros */}
-      <div className="flex flex-col gap-4 md:flex-row">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por número do pedido ou mesa..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full md:w-[200px]">
-            <SelectValue placeholder="Filtrar por status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os status</SelectItem>
-            <SelectItem value="Pendente">Pendente</SelectItem>
-            <SelectItem value="Em andamento">Em andamento</SelectItem>
-            <SelectItem value="Concluído">Concluído</SelectItem>
-            <SelectItem value="Cancelado">Cancelado</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Lista de Pedidos em Cards */}
-      {filteredPedidos.length === 0 ? (
+      <div className="grid gap-4 md:grid-cols-5">
         <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <ShoppingCart className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="font-semibold mb-2">Nenhum pedido encontrado</h3>
-            <p className="text-sm text-muted-foreground text-center mb-4">
-              {searchTerm || statusFilter !== 'all' 
-                ? 'Tente ajustar seus filtros de busca.'
-                : 'Comece criando um novo pedido.'
-              }
-            </p>
-            {!searchTerm && statusFilter === 'all' && (
-              <Button onClick={handleCreate}>
-                <Plus className="mr-2 h-4 w-4" />
-                Criar Primeiro Pedido
-              </Button>
-            )}
+          <CardContent className="p-6">
+            <div className="text-2xl font-bold">{stats.total}</div>
+            <p className="text-xs text-muted-foreground">Total de Pedidos</p>
           </CardContent>
         </Card>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredPedidos.map((pedido) => {
-            // ✅ Usar propriedades diretas da interface
-            const mesa = pedido.mesa;
-            const garcom = pedido.garcom;
-            
-            return (
-              <Card 
-                key={pedido.id} 
-                className="hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer"
-                onClick={() => handleView(pedido)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{pedido.num_pedido}</CardTitle>
-                    <Badge className={`${getStatusColor(pedido.status)} border`}>
-                      <div className="flex items-center gap-1">
-                        {getStatusIcon(pedido.status)}
-                        {pedido.status || 'Indefinido'}
-                      </div>
-                    </Badge>
-                  </div>
-                  <CardDescription className="flex items-center gap-4 text-sm">
-                    <span className="flex items-center gap-1">
-                      <Users className="h-3 w-3" />
-                      Mesa {mesa?.numero}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Timer className="h-3 w-3" />
-                      {getTempoDecorrido(pedido.data_hora)}
-                    </span>
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent className="space-y-3">
-                  {/* ✅ Exibir garçom apenas se existir */}
-                  {garcom && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <UserIcon className="h-4 w-4" />
-                      <span>{garcom.nome} ({garcom.turno})</span>
-                    </div>
-                  )}
-                  
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Itens:</span>
-                      <span className="font-medium">{pedido.itens?.length || 0}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Total:</span>
-                      <span className="font-bold text-lg">R$ {(pedido.total || 0).toFixed(2)}</span>
-                    </div>
-                  </div>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-2xl font-bold text-yellow-600">{stats.aguardando}</div>
+            <p className="text-xs text-muted-foreground">Aguardando</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-2xl font-bold text-blue-600">{stats.emPreparo}</div>
+            <p className="text-xs text-muted-foreground">Em Preparo</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-2xl font-bold text-green-600">{stats.prontos}</div>
+            <p className="text-xs text-muted-foreground">Prontos</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-2xl font-bold text-primary">{formatCurrency(stats.valorTotal)}</div>
+            <p className="text-xs text-muted-foreground">Valor Total Pedidos</p>
+          </CardContent>
+        </Card>
+      </div>
 
-                  {/* Actions rápidas baseadas no status */}
-                  <div className="flex gap-2 pt-2" onClick={e => e.stopPropagation()}>
-                    {pedido.status === 'Pendente' && (
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => updatePedidoStatus(pedido.id, 'Em andamento')}
-                        className="flex-1"
-                      >
-                        <ChefHat className="h-3 w-3 mr-1" />
-                        Iniciar
-                      </Button>
-                    )}
-                    {pedido.status === 'Em andamento' && (
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => updatePedidoStatus(pedido.id, 'Concluído')}
-                        className="flex-1"
-                      >
-                        <Check className="h-3 w-3 mr-1" />
-                        Finalizar
-                      </Button>
-                    )}
-                    <Button size="sm" variant="ghost" onClick={() => handleView(pedido)}>
-                      <Eye className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Dialog de Visualização */}
-      <Dialog open={!!selectedPedido} onOpenChange={() => setSelectedPedido(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              Pedido {selectedPedido?.num_pedido}
-              {selectedPedido && (
-                <Badge className={`${getStatusColor(selectedPedido.status)} border`}>
-                  <div className="flex items-center gap-1">
-                    {getStatusIcon(selectedPedido.status)}
-                    {selectedPedido.status || 'Indefinido'}
-                  </div>
-                </Badge>
-              )}
-            </DialogTitle>
-            <DialogDescription>
-              Detalhes completos do pedido
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedPedido && (
-            <div className="space-y-6">
-              {/* Informações Básicas */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">Mesa</Label>
-                  <p className="font-medium">Mesa {selectedPedido.mesa?.numero}</p>
-                </div>
-                {/* ✅ Exibir garçom apenas se existir */}
-                {selectedPedido.garcom && (
-                  <div>
-                    <Label className="text-muted-foreground">Garçom</Label>
-                    <p className="font-medium">{selectedPedido.garcom.nome}</p>
-                  </div>
-                )}
-                <div>
-                  <Label className="text-muted-foreground">Data/Hora</Label>
-                  <p className="font-medium">{new Date(selectedPedido.data_hora).toLocaleString('pt-BR')}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Tempo Decorrido</Label>
-                  <p className="font-medium">{getTempoDecorrido(selectedPedido.data_hora)}</p>
-                </div>
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por cliente, mesa ou ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <select
+              className="px-4 py-2 border rounded-md"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="todos">Todos os Status</option>
+              <option value="aguardando">Aguardando</option>
+              <option value="em_preparo">Em Preparo</option>
+              <option value="pronto">Prontos</option>
+              <option value="entregue">Entregues</option>
+              <option value="cancelado">Cancelados</option>
+            </select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {filteredPedidos.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                {searchTerm || statusFilter !== "todos" 
+                  ? "Nenhum pedido encontrado" 
+                  : "Nenhum pedido cadastrado"}
               </div>
-
-              <Separator />
-              
-              {/* Itens do Pedido */}
-              <div>
-                <Label className="text-lg font-semibold">Itens do Pedido</Label>
-                <div className="mt-3 space-y-3">
-                  {selectedPedido.itens?.map((item) => {
-                    const produto = mockProdutos.find(p => p.id === item.produto_id);
-                    return (
-                      <Card key={item.id} className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-medium">{produto?.nome || 'Produto desconhecido'}</h4>
-                            {produto?.detalhes && (
-                              <p className="text-sm text-muted-foreground">{produto.detalhes}</p>
-                            )}
-                            <div className="flex items-center gap-4 mt-2 text-sm">
-                              <span>Quantidade: <strong>{item.quantidade}</strong></span>
-                              <span>Unitário: <strong>R$ {produto?.preco_unitario?.toFixed(2)}</strong></span>
-                            </div>
-                            {item.observacoes && (
-                              <div className="mt-2 text-xs bg-blue-50 text-blue-700 p-2 rounded">
-                                💬 {item.observacoes}
-                              </div>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-bold">R$ {item.subtotal?.toFixed(2)}</p>
-                          </div>
+            ) : (
+              filteredPedidos.map((pedido) => (
+                <Card key={pedido.id} className="border-l-4 border-l-primary">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="text-xl font-bold">
+                            Pedido #{pedido.num_pedido}
+                          </span>
+                          {pedido.mesa && (
+                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-semibold">
+                              Mesa {pedido.mesa.numero_mesa}
+                            </span>
+                          )}
                         </div>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
 
-              <Separator />
+                        <div className="text-sm text-muted-foreground flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          {formatDateTime(pedido.data_hora)}
+                        </div>
 
-              {/* Total e Ações */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center text-xl font-bold">
-                  <span>Total do Pedido:</span>
-                  <span>R$ {(selectedPedido.total || 0).toFixed(2)}</span>
-                </div>
-
-                {/* ✅ Ações de Status (CORRIGIDAS) */}
-                {selectedPedido.status && selectedPedido.status !== 'Concluído' && selectedPedido.status !== 'Cancelado' && (
-                  <div className="flex gap-2">
-                    {selectedPedido.status === 'Pendente' && (
-                      <Button 
-                        onClick={() => {
-                          updatePedidoStatus(selectedPedido.id, 'Em andamento');
-                          setSelectedPedido(null);
-                        }}
-                        className="flex-1"
-                      >
-                        <ChefHat className="h-4 w-4 mr-2" />
-                        Iniciar Preparação
-                      </Button>
-                    )}
-                    {selectedPedido.status === 'Em andamento' && (
-                      <Button 
-                        onClick={() => {
-                          updatePedidoStatus(selectedPedido.id, 'Concluído');
-                          setSelectedPedido(null);
-                        }}
-                        className="flex-1"
-                      >
-                        <Check className="h-4 w-4 mr-2" />
-                        Marcar como Concluído
-                      </Button>
-                    )}
-                    <Button 
-                      variant="outline"
-                      onClick={() => {
-                        updatePedidoStatus(selectedPedido.id, 'Cancelado');
-                        setSelectedPedido(null);
-                      }}
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Cancelar
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog de Criação */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Novo Pedido</DialogTitle>
-            <DialogDescription>
-              Crie um novo pedido para o restaurante
-            </DialogDescription>
-          </DialogHeader>
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* ✅ Informações Básicas - Removido campo de garçom */}
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <Label htmlFor="mesa">Mesa *</Label>
-                <Select
-                  value={formData.mesa_id}
-                  onValueChange={(value) => setFormData({ ...formData, mesa_id: value })}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a mesa" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mockMesas.map((mesa) => (
-                      <SelectItem key={mesa.id} value={mesa.id}>
-                        Mesa {mesa.numero} ({mesa.capacidade} pessoas)
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Adição de Itens */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingCart className="h-5 w-5" />
-                  Adicionar Itens ao Pedido
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-[2fr_auto_1fr_auto] gap-2">
-                  <Select
-                    value={currentItem.produto_id}
-                    onValueChange={(value) => setCurrentItem({ ...currentItem, produto_id: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o produto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {mockProdutos.map((produto) => (
-                        <SelectItem key={produto.id} value={produto.id}>
-                          {produto.nome} - R$ {produto.preco_unitario.toFixed(2)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={currentItem.quantidade}
-                    onChange={(e) => setCurrentItem({ ...currentItem, quantidade: e.target.value })}
-                    className="w-20"
-                    placeholder="Qtd"
-                  />
-                  <Input
-                    placeholder="Observações..."
-                    value={currentItem.observacoes}
-                    onChange={(e) => setCurrentItem({ ...currentItem, observacoes: e.target.value })}
-                  />
-                  <Button type="button" onClick={handleAddItem} disabled={!currentItem.produto_id}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {formData.itens.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Itens Adicionados:</Label>
-                    {formData.itens.map((item, index) => {
-                      const produto = mockProdutos.find(p => p.id === item.produto_id);
-                      return (
-                        <Card key={index} className="p-3">
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">{produto?.nome}</span>
-                                <Badge variant="outline">x{item.quantidade}</Badge>
-                              </div>
-                              {item.observacoes && (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  💬 {item.observacoes}
-                                </p>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold">
-                                R$ {((produto?.preco_unitario || 0) * item.quantidade).toFixed(2)}
-                              </span>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleRemoveItem(index)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                        {/* Itens do Pedido */}
+                        {pedido.itens && pedido.itens.length > 0 && (
+                          <div className="space-y-2 border-t pt-3">
+                            <p className="text-sm font-semibold text-muted-foreground">Itens do pedido:</p>
+                            <div className="space-y-1">
+                              {pedido.itens.map((item) => (
+                                <div key={item.id} className="flex justify-between items-start text-sm pl-2">
+                                  <div className="flex-1">
+                                    <p className="font-medium">
+                                      {item.quantidade}x {item.produto?.nome || 'Produto'}
+                                    </p>
+                                    {item.produto?.marca && (
+                                      <p className="text-xs text-muted-foreground">
+                                        {item.produto.marca}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <p className="font-medium text-muted-foreground ml-2">
+                                    R$ {((item.produto?.preco_unitario || 0) * item.quantidade).toFixed(2)}
+                                  </p>
+                                </div>
+                              ))}
                             </div>
                           </div>
-                        </Card>
-                      );
-                    })}
-                    
-                    <div className="flex justify-between items-center border-t pt-3">
-                      <span className="text-lg font-semibold">Total do Pedido:</span>
-                      <span className="text-xl font-bold">R$ {calculateTotal().toFixed(2)}</span>
+                        )}
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3 pt-2 border-t">
+                            <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold ${getStatusColor(pedido.status_preparo || 'aguardando')}`}>
+                              {getStatusIcon(pedido.status_preparo || 'aguardando')}
+                              {getStatusLabel(pedido.status_preparo || 'aguardando')}
+                            </span>
+                            <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                              {formatCurrency(pedido.valor)}
+                            </span>
+                            <span className="text-xs text-green-600 dark:text-green-400 font-semibold ml-2">
+                              ✓ Pago
+                            </span>
+                          </div>
+                          {pedido.mesa && pedido.mesa.total > 0 && (
+                            <div className="flex items-center gap-2 text-sm bg-primary/5 px-3 py-2 rounded-lg">
+                              <span className="text-muted-foreground">Total acumulado da Mesa {pedido.mesa.numero_mesa}:</span>
+                              <span className="font-bold text-primary">{formatCurrency(pedido.mesa.total)}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2 lg:min-w-[180px]">
+                        <select
+                          className="px-3 py-2 border-2 rounded-lg text-sm font-medium hover:bg-muted/50 transition-colors cursor-pointer"
+                          value={pedido.status_preparo || 'aguardando'}
+                          onChange={(e) => handleStatusChange(pedido.id, e.target.value)}
+                        >
+                          <option value="aguardando">Aguardando</option>
+                          <option value="em_preparo">Em Preparo</option>
+                          <option value="pronto">Pronto</option>
+                          <option value="entregue">Entregue</option>
+                          <option value="cancelado">Cancelado</option>
+                        </select>
+                        <Button variant="outline" size="sm" className="w-full">
+                          <Eye className="h-4 w-4 mr-2" />
+                          Ver Detalhes
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-                {formData.itens.length === 0 && (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      Adicione pelo menos um item para criar o pedido.
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Botões de Ação */}
-            <div className="flex gap-2 pt-4">
-              <Button 
-                type="submit" 
-                className="flex-1" 
-                disabled={formData.itens.length === 0 || !formData.mesa_id}
-              >
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                Criar Pedido (R$ {calculateTotal().toFixed(2)})
-              </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setShowForm(false)} 
-                className="flex-1"
-              >
-                Cancelar
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <div className="text-sm text-muted-foreground">
+        Mostrando {filteredPedidos.length} de {pedidos.length} pedido(s)
+      </div>
     </div>
   );
 }

@@ -1,257 +1,256 @@
 "use client";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/src/app/components/ui/card";
+import { Button } from "@/src/app/components/ui/button";
+import { DollarSign, ShoppingCart, Users, TrendingUp, Download, Calendar } from "lucide-react";
+import { pedidosAPI, clientesAPI, produtosAPI } from "@/src/app/lib/api";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/app/components/ui/card';
-import { Label } from '@/src/app/components/ui/label';
-import { Input } from '@/src/app/components/ui/input';
-import { Button } from '@/src/app/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/app/components/ui/select';
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
-import { Download, Calendar } from 'lucide-react';
-
-// Mock data
-const vendas30Dias = [
-  { data: '01/01', valor: 1200 },
-  { data: '02/01', valor: 1500 },
-  { data: '03/01', valor: 1800 },
-  { data: '04/01', valor: 2100 },
-  { data: '05/01', valor: 1900 },
-  { data: '06/01', valor: 2400 },
-  { data: '07/01', valor: 2800 },
-];
-
-const produtosMaisVendidos = [
-  { nome: 'Hambúrguer', quantidade: 145 },
-  { nome: 'Refrigerante', quantidade: 230 },
-  { nome: 'Batata Frita', quantidade: 180 },
-  { nome: 'Pizza', quantidade: 95 },
-  { nome: 'Salada', quantidade: 68 },
-];
-
-const mesasUtilizacao = [
-  { nome: 'Disponível', value: 35 },
-  { nome: 'Ocupada', value: 40 },
-  { nome: 'Reservada', value: 15 },
-  { nome: 'Fechada', value: 10 },
-];
-
-const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#6b7280'];
-
-const faturamentoPorCategoria = [
-  { categoria: 'Bebidas', valor: 4500 },
-  { categoria: 'Lanches', valor: 8200 },
-  { categoria: 'Sobremesas', valor: 2100 },
-  { categoria: 'Pratos Principais', valor: 12400 },
-  { categoria: 'Entradas', valor: 3200 },
-];
+interface RelatorioData {
+  receitaTotal: number;
+  receitaMes: number;
+  receitaHoje: number;
+  totalPedidos: number;
+  pedidosMes: number;
+  pedidosHoje: number;
+  totalClientes: number;
+  ticketMedio: number;
+  produtoMaisVendido: string;
+  mesaMaisUsada: string;
+}
 
 export default function RelatoriosPage() {
-  const [dateRange, setDateRange] = useState({
-    inicio: '',
-    fim: '',
+  const [data, setData] = useState<RelatorioData>({
+    receitaTotal: 0,
+    receitaMes: 0,
+    receitaHoje: 0,
+    totalPedidos: 0,
+    pedidosMes: 0,
+    pedidosHoje: 0,
+    totalClientes: 0,
+    ticketMedio: 0,
+    produtoMaisVendido: '-',
+    mesaMaisUsada: '-',
   });
-  const [tipoRelatorio, setTipoRelatorio] = useState('vendas');
+  const [loading, setLoading] = useState(true);
 
-  const handleExport = () => {
-    alert('Exportando relatório...');
+  useEffect(() => {
+    loadRelatorios();
+  }, []);
+
+  const loadRelatorios = async () => {
+    try {
+      setLoading(true);
+
+      const [pedidos, clientes] = await Promise.all([
+        pedidosAPI.list(),
+        clientesAPI.list(),
+      ]);
+
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+
+      // Filtrar pedidos
+      const pedidosArray = Array.isArray(pedidos) ? pedidos : [];
+      const pedidosHoje = pedidosArray.filter((p: any) => {
+        const dataPedido = new Date(p.data_hora);
+        return dataPedido >= hoje;
+      });
+
+      const pedidosMes = pedidosArray.filter((p: any) => {
+        const dataPedido = new Date(p.data_hora);
+        return dataPedido >= primeiroDiaMes;
+      });
+
+      // Calcular receitas
+      const receitaTotal = pedidosArray.reduce((acc: number, p: any) => 
+        acc + (Number(p.valor_total) || 0), 0
+      );
+
+      const receitaMes = pedidosMes.reduce((acc: number, p: any) => 
+        acc + (Number(p.valor_total) || 0), 0
+      );
+
+      const receitaHoje = pedidosHoje.reduce((acc: number, p: any) => 
+        acc + (Number(p.valor_total) || 0), 0
+      );
+
+      // Ticket médio
+      const ticketMedio = pedidosArray.length > 0 
+        ? receitaTotal / pedidosArray.length 
+        : 0;
+
+      setData({
+        receitaTotal,
+        receitaMes,
+        receitaHoje,
+        totalPedidos: pedidosArray.length,
+        pedidosMes: pedidosMes.length,
+        pedidosHoje: pedidosHoje.length,
+        totalClientes: Array.isArray(clientes) ? clientes.length : 0,
+        ticketMedio,
+        produtoMaisVendido: '-',
+        mesaMaisUsada: '-',
+      });
+    } catch (error) {
+      console.error("Erro ao carregar relatórios:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg">Carregando relatórios...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1>Relatórios</h1>
-          <p className="text-muted-foreground">
-            Análise e estatísticas do restaurante
-          </p>
+          <h1 className="text-3xl font-bold">Relatórios</h1>
+          <p className="text-muted-foreground">Análise de desempenho do restaurante</p>
         </div>
-        <Button onClick={handleExport}>
+        <Button>
           <Download className="mr-2 h-4 w-4" />
-          Exportar Relatório
+          Exportar PDF
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Filtros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
-              <Label htmlFor="tipo">Tipo de Relatório</Label>
-              <Select value={tipoRelatorio} onValueChange={setTipoRelatorio}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="vendas">Vendas</SelectItem>
-                  <SelectItem value="produtos">Produtos</SelectItem>
-                  <SelectItem value="mesas">Mesas</SelectItem>
-                  <SelectItem value="financeiro">Financeiro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="inicio">Data Início</Label>
-              <Input
-                id="inicio"
-                type="date"
-                value={dateRange.inicio}
-                onChange={(e) => setDateRange({ ...dateRange, inicio: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="fim">Data Fim</Label>
-              <Input
-                id="fim"
-                type="date"
-                value={dateRange.fim}
-                onChange={(e) => setDateRange({ ...dateRange, fim: e.target.value })}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(data.receitaTotal)}</div>
+            <p className="text-xs text-muted-foreground">Desde o início</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Receita do Mês</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(data.receitaMes)}</div>
+            <p className="text-xs text-muted-foreground">{data.pedidosMes} pedidos</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Receita Hoje</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(data.receitaHoje)}</div>
+            <p className="text-xs text-muted-foreground">{data.pedidosHoje} pedidos</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(data.ticketMedio)}</div>
+            <p className="text-xs text-muted-foreground">Por pedido</p>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Faturamento - Últimos 7 Dias</CardTitle>
+            <CardTitle>Resumo de Vendas</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={vendas30Dias}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="data" />
-                <YAxis />
-                <Tooltip
-                  formatter={(value) => [`R$ ${value}`, 'Faturamento']}
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                  }}
-                />
-                <Line type="monotone" dataKey="valor" stroke="hsl(var(--primary))" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Total de Pedidos</span>
+                <span className="text-2xl font-bold">{data.totalPedidos}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Pedidos do Mês</span>
+                <span className="text-2xl font-bold text-blue-600">{data.pedidosMes}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Pedidos Hoje</span>
+                <span className="text-2xl font-bold text-green-600">{data.pedidosHoje}</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Utilização de Mesas</CardTitle>
+            <CardTitle>Informações Gerais</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={mesasUtilizacao}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ nome, value }) => `${nome}: ${value}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {mesasUtilizacao.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value) => [`${value}%`, 'Percentual']}
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Produtos Mais Vendidos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={produtosMaisVendidos}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="nome" />
-                <YAxis />
-                <Tooltip
-                  formatter={(value) => [`${value} unidades`, 'Quantidade']}
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                  }}
-                />
-                <Bar dataKey="quantidade" fill="hsl(var(--chart-2))" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Faturamento por Categoria</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={faturamentoPorCategoria} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="categoria" type="category" width={120} />
-                <Tooltip
-                  formatter={(value) => [`R$ ${value}`, 'Faturamento']}
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                  }}
-                />
-                <Bar dataKey="valor" fill="hsl(var(--chart-4))" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Total de Clientes</span>
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-2xl font-bold">{data.totalClientes}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Produto Mais Vendido</span>
+                <span className="text-lg font-semibold">{data.produtoMaisVendido}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Mesa Mais Usada</span>
+                <span className="text-lg font-semibold">{data.mesaMaisUsada}</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Resumo Geral</CardTitle>
+          <CardTitle>Desempenho por Período</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="space-y-2">
-              <p className="text-muted-foreground">Total de Vendas</p>
-              <p>R$ 30.400,00</p>
-            </div>
-            <div className="space-y-2">
-              <p className="text-muted-foreground">Ticket Médio</p>
-              <p>R$ 125,50</p>
-            </div>
-            <div className="space-y-2">
-              <p className="text-muted-foreground">Total de Pedidos</p>
-              <p>242</p>
-            </div>
-            <div className="space-y-2">
-              <p className="text-muted-foreground">Taxa de Ocupação</p>
-              <p>68%</p>
+          <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="p-4 border rounded-lg">
+                <div className="text-sm text-muted-foreground mb-1">Hoje</div>
+                <div className="text-2xl font-bold">{formatCurrency(data.receitaHoje)}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {data.pedidosHoje} pedidos
+                </div>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <div className="text-sm text-muted-foreground mb-1">Este Mês</div>
+                <div className="text-2xl font-bold">{formatCurrency(data.receitaMes)}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {data.pedidosMes} pedidos
+                </div>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <div className="text-sm text-muted-foreground mb-1">Total</div>
+                <div className="text-2xl font-bold">{formatCurrency(data.receitaTotal)}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {data.totalPedidos} pedidos
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>

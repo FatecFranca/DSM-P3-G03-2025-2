@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/src/app/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/app/components/ui/card';
 import { Badge } from '@/src/app/components/ui/badge';
-import { Separator } from '@/src/app/components/ui/separator';
+
 import {
   Zap,
   Shield,
