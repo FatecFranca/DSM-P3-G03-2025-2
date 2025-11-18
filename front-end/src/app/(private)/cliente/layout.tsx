@@ -6,6 +6,7 @@ import { useAuth } from "@/src/app/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { clientesAPI } from "@/src/app/lib/api";
 
+
 interface ClienteData {
   id: string;
   mesa_id?: string;
@@ -30,8 +31,8 @@ export default function ClienteLayout({
 
       // Verificar se é cliente
       if (!isCliente) {
-        console.log('⚠️ Usuário não é cliente, redirecionando para home');
-        router.push("/");
+        console.log('⚠️ Usuário não é cliente, redirecionando para sign-in');
+        router.push("/sign-in");
         return;
       }
 
@@ -101,5 +102,9 @@ export default function ClienteLayout({
     );
   }
 
-  return <>{children}</>;
+  return <>
+    
+  {children}
+
+  </>;
 }
