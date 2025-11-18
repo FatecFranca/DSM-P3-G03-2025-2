@@ -1,41 +1,46 @@
 # DSM-P3-G03-2025-2
 Repositório do GRUPO 03 do Projeto Interdisciplinar do 3º semestre DSM 2025/2. Alunos: André Coral Rodrigues, Bruno José Rodrigues da Silva,  Guilherme de Araújo Silva.
 
-📋 Sobre o Projeto
+## 📋 Sobre o Projeto
+
 PedidoRapido é uma plataforma de gerenciamento que permite:
 
-🗂️ Cadastro e gestão do estabelecimento e clientes
-🛍️ Venda e gerenciamento de produtos 
-📊 Gerenciamento de estoque
-🪑  Gerenciamento de mesas
-👥 Sistema de clientes e pedidos
-🏭 Controle de fornecedores
+-   🗂️ Cadastro e gestão do estabelecimento e clientes
+-   🛍️ Venda e gerenciamento de produtos
+-   📊 Gerenciamento de estoque
+-   🪑 Gerenciamento de mesas
+-   👥 Sistema de clientes e pedidos
+-   🏭 Controle de fornecedores
 
-Backend
-Node.js + Express.js - API REST
-Prisma ORM - Gerenciamento de banco de dados
-MongoDB - Banco de dados NoSQL
-JWT - Autenticação
-Bcrypt - Hash de senhas
 
-Frontend
-Next.js 16 - Framework React
-React 19 - Biblioteca UI
-TypeScript - Tipagem estática
-Tailwind CSS - Estilização
+## 🛠️ Backend
+
+-   Node.js + Express.js - API REST
+-   Prisma ORM - Gerenciamento de banco de dados
+-   MongoDB - Banco de dados NoSQL
+-   JWT - Autenticação
+-   Bcrypt - Hash de senhas
+
+## 🎨 Frontend
+
+-   Next.js 16 - Framework React
+-   React 19 - Biblioteca UI
+-   TypeScript - Tipagem estática
+-   Tailwind CSS - Estilização
+
 
 📁 Estrutura do Projeto
 
 
 
 
-🔧 Instalação e Configuração
+## 🔧 Instalação e Configuração
 
 Node.js 18+
 MongoDB (local ou MongoDB Atlas)
 npm ou yarn
 
-1. Clone o Repositório
+
 
 #### 1. Clone o repositório
 ```bash
@@ -45,7 +50,7 @@ cd DSM-P3-G03-2025-2
 
 
 
-2. Configure o Backend
+## 2. Configure o Backend
 
 ```bash
 cd backend
@@ -83,7 +88,7 @@ Frontend rodando em: http://localhost:3000
 
 ```
 
-📚 Documentação Completa
+## 📚 Documentação Completa
 Backend API
 Estrutura da API
 A API segue o padrão MVC + Service/Route:
@@ -94,14 +99,14 @@ Models: Definidos no Prisma schema
 
 ### CLIENTE
 
-AUTENTICAÇÃO
+## AUTENTICAÇÃO
 ````bash
 POST   /clientes/register      # Registrar cliente
 POST   /clientes/login         # Login de cliente
 GET    /clientes/verify        # Verificar token do cliente (JWT)
 ````
 
-CRUD
+## CRUD
 ````bash
 POST   /clientes              # Criar cliente
 GET    /clientes              # Listar clientes
@@ -122,12 +127,12 @@ DELETE /categorias/:id        # Deletar categoria
 
 ### GARCOM
 
- AUTENTICAÇÃO
+ # AUTENTICAÇÃO
 ```bash
 POST   /garcons/login         # Login de garçom
 
 ```
- CRUD
+ # CRUD
 ```bash
 POST   /garcons               # Criar garçom
 GET    /garcons               # Listar garçons
@@ -150,7 +155,7 @@ POST   /mesas/:id/sair        # Cliente sair da mesa (JWT)
 
 ### PEDIDOS
 
- CRUD 
+ # CRUD 
 ```bash
 POST   /pedidos               # Criar pedido
 GET    /pedidos               # Listar pedidos
@@ -212,14 +217,14 @@ Garcom (1) → (N) Pedidos
 
 ``` 
 
-Visualizar Dados
+## Visualizar Dados
 Use o Prisma Studio para visualizar e editar dados:
 
 cd backend
 npx prisma studio
 Abre em: http://localhost:5555
 
-🔐 Segurança
+## 🔐 Segurança
 
 ✅ Hash de senhas com bcrypt
 ✅ Autenticação baseada em JWT
@@ -229,12 +234,12 @@ Abre em: http://localhost:5555
 ✅ Variáveis de ambiente para secrets
 
 
-🐛 Troubleshooting
+## 🐛 Troubleshooting
 
 Erro de conexão com MongoDB
 Erro: "Can't reach database server"
 
-Soluções:
+# Soluções:
 
 1-Verifique se o MongoDB está rodando
 2-Confirme a DATABASE_URL no .env
@@ -244,20 +249,21 @@ Soluções:
 Prisma Client não encontrado
 Erro: "Cannot find module '@prisma/client'"
 
-Solução:
+# Solução:
 
 cd backend
 npx prisma generate
 
 
-🧪 Testes
+## 🧪 Testes
 Testar API Backend
 Health Check:
 
 curl http://localhost:3000/
 
-Registrar Admin:
+# Registrar Admin:
 
+```bash
 curl -X POST http://localhost:3000/auth/cliente/register \
   -H "Content-Type: application/json" \
   -d '{
@@ -270,9 +276,10 @@ curl -X POST http://localhost:3000/auth/cliente/register \
     "celular": "16555554444",
     "mesa_id": null
   }'
+```
+  # Registrar Cliente:
 
-  Registrar Cliente:
-
+```bash
   curl -X POST http://localhost:3000/auth/cliente/register \
   -H "Content-Type: application/json" \
   -d '{
@@ -285,14 +292,14 @@ curl -X POST http://localhost:3000/auth/cliente/register \
     "celular": "16555554444",
     "mesa_id": null
   }'
-
-Testar Frontend
+```
+# Testar Frontend
 Acesse http://localhost:3000
 Vá para /auth/register e crie uma conta
 Faça login em /auth
 Navegue pela aplicação
 
-📖 Recursos Adicionais
+## 📖 Recursos Adicionais
 Ferramentas Recomendadas
 Postman/Insomnia - Testar API
 MongoDB Compass - GUI para MongoDB local
@@ -301,14 +308,14 @@ MongoDB Compass - GUI para MongoDB local
 -ESLint
 
 
-Links Úteis
+## Links Úteis
 -Documentação do Express
 -Documentação do Prisma
 -Documentação do Next.js
 -MongoDB Atlas
 
 
-💻Equipe
+## 💻Equipe
 GRUPO 03 - DSM 3º Semestre 2025/2
 
 André Coral Rodrigues
