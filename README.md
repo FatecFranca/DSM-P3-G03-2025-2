@@ -246,12 +246,12 @@ Abre em: http://localhost:5555
 
 ## 🔐 Segurança
 
-**✅ Hash de senhas com bcrypt**
-**✅ Autenticação baseada em JWT**
-**✅ Controle de acesso baseado em roles**
-**✅ Rotas protegidas com middleware de autenticação**
-**✅ Configuração de CORS**
-**✅ Variáveis de ambiente para secrets**
+- **✅ Hash de senhas com bcrypt**
+- **✅ Autenticação baseada em JWT**
+- **✅ Controle de acesso baseado em roles**
+- **✅ Rotas protegidas com middleware de autenticação**
+- **✅ Configuração de CORS**
+- **✅ Variáveis de ambiente para secrets**
 
 
 ## 🐛 Troubleshooting
