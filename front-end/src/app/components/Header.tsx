@@ -67,8 +67,12 @@ export function Header() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  Perfil
+                  <DropdownMenuItem asChild>
+                    <a href="/admin/perfil" className="flex items-center w-full">
+                      <User className="mr-2 h-4 w-4" />
+                        Perfil
+                    </a>
+                  </DropdownMenuItem>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout}>
