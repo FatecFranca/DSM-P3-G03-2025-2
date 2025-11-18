@@ -245,4 +245,7 @@ export const withRelations = (...relations: string[]) => ({
   include: relations.join(',')
 });
 
+// API destinda aos relatorios PDF
+export const relatoriosAPI = {}
+
 export default api;

@@ -3,7 +3,9 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/app/components/ui/card";
 import { Button } from "@/src/app/components/ui/button";
 import { DollarSign, ShoppingCart, Users, TrendingUp, Download, Calendar } from "lucide-react";
-import { pedidosAPI, clientesAPI, produtosAPI } from "@/src/app/lib/api";
+import { pedidosAPI, clientesAPI } from "@/src/app/lib/api";
+import { gerarPDFRelatorio } from "@/src/app/lib/gerarPDFRelatorio";
+import { toast } from "sonner";
 
 interface RelatorioData {
   receitaTotal: number;
@@ -46,6 +48,7 @@ export default function RelatoriosPage() {
         clientesAPI.list(),
       ]);
 
+      
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
 
@@ -65,15 +68,15 @@ export default function RelatoriosPage() {
 
       // Calcular receitas
       const receitaTotal = pedidosArray.reduce((acc: number, p: any) => 
-        acc + (Number(p.valor_total) || 0), 0
+        acc + (Number(p.valor) || 0), 0
       );
 
       const receitaMes = pedidosMes.reduce((acc: number, p: any) => 
-        acc + (Number(p.valor_total) || 0), 0
+        acc + (Number(p.valor) || 0), 0
       );
 
       const receitaHoje = pedidosHoje.reduce((acc: number, p: any) => 
-        acc + (Number(p.valor_total) || 0), 0
+        acc + (Number(p.valor) || 0), 0
       );
 
       // Ticket médio
@@ -115,6 +118,33 @@ export default function RelatoriosPage() {
     );
   }
 
+  const exportarPDF = async () => {
+    try {
+      toast.info('Gerando PDF...', {
+        description: 'Aguarde enquanto preparamos seu relatório'
+      });
+
+      // Gerar PDF diretamente no frontend com os dados já carregados
+      gerarPDFRelatorio({
+        receitaTotal: data.receitaTotal,
+        receitaMes: data.receitaMes,
+        receitaHoje: data.receitaHoje,
+        totalPedidos: data.totalPedidos,
+        pedidosMes: data.pedidosMes,
+        pedidosHoje: data.pedidosHoje
+      });
+
+      toast.success('PDF gerado com sucesso!', {
+        description: 'O arquivo foi baixado para seu computador'
+      });
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      toast.error('Erro ao gerar relatório', {
+        description: 'Tente novamente mais tarde'
+      });
+    }
+  }
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -122,9 +152,9 @@ export default function RelatoriosPage() {
           <h1 className="text-3xl font-bold">Relatórios</h1>
           <p className="text-muted-foreground">Análise de desempenho do restaurante</p>
         </div>
-        <Button>
+        <Button onClick={exportarPDF}>
           <Download className="mr-2 h-4 w-4" />
-          Exportar PDF
+            Exportar PDF
         </Button>
       </div>
 
