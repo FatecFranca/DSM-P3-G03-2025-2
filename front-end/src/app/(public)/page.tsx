@@ -125,11 +125,11 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background">
         <div className="absolute inset-0 bg-grid-slate-900/[0.04] bg-[size:32px_32px]" />
-        <div className="container relative py-16 md:py-24 lg:py-32">
+        <div className="container mx-auto relative py-16 md:py-24 lg:py-32">
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-4">
               <Sparkles className="mr-1 h-3 w-3" />
@@ -177,39 +177,44 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="container py-16 md:py-24">
-        <div className="text-center mb-12">
-          <Badge variant="outline" className="mb-4">Recursos</Badge>
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl mb-4">
-            Tudo que Você Precisa em Um Só Lugar
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Ferramentas poderosas e fáceis de usar para otimizar cada aspecto do seu negócio
-          </p>
-        </div>
+<section className="py-16 md:py-24">
+  <div className="container mx-auto">
+    
+    
+    <div className="text-center mb-12">
+      <Badge variant="outline" className="mb-4">Recursos</Badge>
+      <h2 className="text-3xl font-bold tracking-tight md:text-4xl mb-4">
+        Tudo que Você Precisa em Um Só Lugar
+      </h2>
+      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        Ferramentas poderosas e fáceis de usar para otimizar cada aspecto do seu negócio
+      </p>
+    </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature, index) => (
-            <Card key={index} className="hover:shadow-lg transition-all hover:-translate-y-1">
-              <CardHeader>
-                <div className={`h-12 w-12 rounded-lg ${feature.bgColor} flex items-center justify-center mb-4`}>
-                  <feature.icon className={`h-6 w-6 ${feature.color}`} />
-                </div>
-                <CardTitle className="text-xl">{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">
-                  {feature.description}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {features.map((feature, index) => (
+        <Card key={index} className="hover:shadow-lg transition-all hover:-translate-y-1">
+          <CardHeader>
+            <div className={`h-12 w-12 rounded-lg ${feature.bgColor} flex items-center justify-center mb-4`}>
+              <feature.icon className={`h-6 w-6 ${feature.color}`} />
+            </div>
+            <CardTitle className="text-xl">{feature.title}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CardDescription className="text-base">
+              {feature.description}
+            </CardDescription>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+    
+  </div>
+</section>
 
       {/* Benefits Section */}
       <section className="bg-muted/50">
-        <div className="container py-16 md:py-24">
+        <div className="container mx-auto py-16 md:py-24">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="lg:pl-8">
               <Badge variant="outline" className="mb-4">Benefícios</Badge>
@@ -281,69 +286,74 @@ export default function HomePage() {
       </section>
 
       {/* Pricing Section */}
-      <section className="container py-16 md:py-24">
-        <div className="text-center mb-12">
-          <Badge variant="outline" className="mb-4">Planos</Badge>
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl mb-4">
-            Escolha o Plano Ideal para Você
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Comece gratuitamente e evolua conforme seu negócio cresce
-          </p>
-        </div>
+<section className="py-16 md:py-24"> 
+  <div className="container mx-auto"> 
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {plans.map((plan, index) => (
-            <Card
-              key={index}
-              className={`relative ${
-                plan.highlighted
-                  ? 'border-primary shadow-xl scale-105'
-                  : 'hover:shadow-lg transition-shadow'
-              }`}
-            >
-              {plan.highlighted && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <Badge className="shadow-lg">Mais Popular</Badge>
-                </div>
+    
+    <div className="text-center mb-12">
+      <Badge variant="outline" className="mb-4">Planos</Badge>
+      <h2 className="text-3xl font-bold tracking-tight md:text-4xl mb-4">
+        Escolha o Plano Ideal para Você
+      </h2>
+      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        Comece gratuitamente e evolua conforme seu negócio cresce
+      </p>
+    </div>
+
+    <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+      {plans.map((plan, index) => (
+        <Card
+          key={index}
+          className={`relative ${
+            plan.highlighted
+              ? 'border-primary shadow-xl scale-105'
+              : 'hover:shadow-lg transition-shadow'
+          }`}
+        >
+          {plan.highlighted && (
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+              <Badge className="shadow-lg">Mais Popular</Badge>
+            </div>
+          )}
+          <CardHeader className="text-center pb-8">
+            <CardTitle className="text-2xl">{plan.name}</CardTitle>
+            <CardDescription className="text-base">{plan.description}</CardDescription>
+            <div className="mt-4">
+              <span className="text-4xl font-bold">{plan.price}</span>
+              {plan.price !== 'Personalizado' && plan.price !== 'Grátis' && (
+                <span className="text-muted-foreground">/mês</span>
               )}
-              <CardHeader className="text-center pb-8">
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                <CardDescription className="text-base">{plan.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  {plan.price !== 'Personalizado' && plan.price !== 'Grátis' && (
-                    <span className="text-muted-foreground">/mês</span>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 mb-6">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  className="w-full"
-                  variant={plan.highlighted ? 'default' : 'outline'}
-                  asChild
-                >
-                  <Link href="/register">
-                    {plan.price === 'Personalizado' ? 'Falar com Vendas' : 'Começar Agora'}
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-3 mb-6">
+              {plan.features.map((feature, idx) => (
+                <li key={idx} className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <Button
+              className="w-full"
+              variant={plan.highlighted ? 'default' : 'outline'}
+              asChild
+            >
+              <Link href="/register">
+                {plan.price === 'Personalizado' ? 'Falar com Vendas' : 'Começar Agora'}
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+
+  </div> 
+</section>
 
       {/* CTA Section */}
       <section className="bg-gradient-to-r from-primary to-purple-600 text-primary-foreground">
-        <div className="container py-16 md:py-24">
+        <div className="container mx-auto py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl mb-6">
               Pronto para Revolucionar Seu Negócio?
