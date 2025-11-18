@@ -366,7 +366,7 @@ export default function PedidoMesaPage() {
       console.log('🚪 Saindo da mesa...');
 
       // Chamar a rota de sair da mesa (usa token JWT automaticamente)
-      const resultado = await mesasAPI.sairDaMesa(user.mesa_id);
+      const resultado = await mesasAPI.sairDaMesa(user.mesa_id) as any;
       console.log('✅ Resultado:', resultado);
       
       if (resultado.mesaLiberada) {
