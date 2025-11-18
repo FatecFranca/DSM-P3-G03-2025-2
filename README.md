@@ -145,12 +145,12 @@ DELETE /categorias/:id        # Deletar categoria
 
 ## GARCOM
 
- ### AUTENTICAÇÃO
+ #### AUTENTICAÇÃO
 ```bash
 POST   /garcons/login         # Login de garçom
 
 ```
- ### CRUD
+ #### CRUD
 ```bash
 POST   /garcons               # Criar garçom
 GET    /garcons               # Listar garçons
@@ -173,7 +173,7 @@ POST   /mesas/:id/sair        # Cliente sair da mesa (JWT)
 
 ## PEDIDOS
 
- ### CRUD 
+ #### CRUD 
 ```bash
 POST   /pedidos               # Criar pedido
 GET    /pedidos               # Listar pedidos
@@ -204,14 +204,14 @@ DELETE /produtos/:id           # Deletar produto
 
 ```
 
-## Tipos de Usuário
+### Tipos de Usuário
 **Admin:** Pode gerenciar produtos, clientes, garcons, mesas e pedidos.
 **Cliente:** Pode entrar escolher uma mesa do sistema, fazer pedidos
 e gerenciar seu perfil.
 **Garcom:** Pode gerenciar mesas e pedidos.
 
 
-## Parâmetros de Include Suportados
+### Parâmetros de Include Suportados
 
 - **Mesas**: `?include=cliente` ou `?include=clientes`
 - **Pedidos**: `?include=mesa`, `?include=garcom`, `?include=itens`
@@ -221,7 +221,7 @@ e gerenciar seu perfil.
 - **Garçons**: `?include=pedidos`
 
 
-## RELACIONAMENTOS 
+### Relacionamentos
 
 ```bash
 
@@ -235,7 +235,7 @@ Garcom (1) → (N) Pedidos
 
 ``` 
 
-## Visualizar Dados
+
 ## Visualizar Dados
 Use o Prisma Studio para visualizar e editar dados:
 
@@ -243,7 +243,7 @@ cd backend
 npx prisma studio
 Abre em: http://localhost:5555
 
-## 🔐 Segurança
+
 ## 🔐 Segurança
 
 **✅ Hash de senhas com bcrypt**
@@ -255,7 +255,7 @@ Abre em: http://localhost:5555
 
 
 ## 🐛 Troubleshooting
-## 🐛 Troubleshooting
+
 
 ### Erro de conexão com MongoDB  
 **Erro:** `"Can't reach database server"`  
