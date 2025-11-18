@@ -49,7 +49,7 @@ PedidoRapido é uma plataforma de gerenciamento que permite:
 
 
 ## 🔧 Instalação e Configuração
-## 🔧 Instalação e Configuração
+
 
 Node.js 18+
 MongoDB (local ou MongoDB Atlas)
@@ -106,7 +106,7 @@ Frontend rodando em: http://localhost:3000
 ```
 
 ## 📚 Documentação Completa
-## 📚 Documentação Completa
+
 Backend API
 Estrutura da API
 A API segue o padrão MVC + Service/Route:
