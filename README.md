@@ -205,10 +205,10 @@ DELETE /produtos/:id           # Deletar produto
 ```
 
 ### Tipos de Usuário
-**Admin:** Pode gerenciar produtos, clientes, garcons, mesas e pedidos.
-**Cliente:** Pode entrar escolher uma mesa do sistema, fazer pedidos
+- **Admin:** Pode gerenciar produtos, clientes, garcons, mesas e pedidos.
+- **Cliente:** Pode entrar escolher uma mesa do sistema, fazer pedidos
 e gerenciar seu perfil.
-**Garcom:** Pode gerenciar mesas e pedidos.
+- **Garcom:** Pode gerenciar mesas e pedidos.
 
 
 ### Parâmetros de Include Suportados
