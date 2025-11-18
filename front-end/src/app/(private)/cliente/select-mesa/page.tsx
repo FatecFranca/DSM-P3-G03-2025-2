@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { api } from '@/src/app/lib/api';
 import { useAuth } from '@/src/app/contexts/AuthContext';
 
+
 interface Mesa {
   id: string;
   numero: number;
@@ -153,7 +154,10 @@ export default function SelectMesaPage() {
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2 bg-muted px-3 py-1.5 rounded-lg">
               <User className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium truncate max-w-[150px]">{user?.nome}</span>
+                <a href="/cliente/perfil"> {/* Link externo */}
+                  <span className="text-sm font-medium truncate max-w-[150px]">{user?.nome}
+                  </span>
+                </a>
             </div>
             <Button
               variant="outline"
