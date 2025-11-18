@@ -109,7 +109,7 @@ Frontend rodando em: http://localhost:3000
 
 Backend API
 Estrutura da API
-A API segue o padrão MVC + Service/Route:
+A API segue o padrão MVC
 
 Routes: Definem endpoints e aplicam middlewares
 Controllers: Lidam com requisições HTTP
