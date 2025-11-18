@@ -11,12 +11,6 @@ PedidoRapido é uma plataforma de gerenciamento que permite:
 -   🪑 Gerenciamento de mesas
 -   👥 Sistema de clientes e pedidos
 -   🏭 Controle de fornecedores
--   🗂️ Cadastro e gestão do estabelecimento e clientes
--   🛍️ Venda e gerenciamento de produtos
--   📊 Gerenciamento de estoque
--   🪑 Gerenciamento de mesas
--   👥 Sistema de clientes e pedidos
--   🏭 Controle de fornecedores
 
 
 ## 🛠️ Backend
@@ -27,13 +21,6 @@ PedidoRapido é uma plataforma de gerenciamento que permite:
 -   JWT - Autenticação
 -   Bcrypt - Hash de senhas
 
-## 🛠️ Backend
-
--   Node.js + Express.js - API REST
--   Prisma ORM - Gerenciamento de banco de dados
--   MongoDB - Banco de dados NoSQL
--   JWT - Autenticação
--   Bcrypt - Hash de senhas
 
 ## 🎨 Frontend
 
