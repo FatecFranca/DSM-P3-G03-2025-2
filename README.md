@@ -11,7 +11,21 @@ PedidoRapido é uma plataforma de gerenciamento que permite:
 -   🪑 Gerenciamento de mesas
 -   👥 Sistema de clientes e pedidos
 -   🏭 Controle de fornecedores
+-   🗂️ Cadastro e gestão do estabelecimento e clientes
+-   🛍️ Venda e gerenciamento de produtos
+-   📊 Gerenciamento de estoque
+-   🪑 Gerenciamento de mesas
+-   👥 Sistema de clientes e pedidos
+-   🏭 Controle de fornecedores
 
+
+## 🛠️ Backend
+
+-   Node.js + Express.js - API REST
+-   Prisma ORM - Gerenciamento de banco de dados
+-   MongoDB - Banco de dados NoSQL
+-   JWT - Autenticação
+-   Bcrypt - Hash de senhas
 
 ## 🛠️ Backend
 
@@ -35,10 +49,12 @@ PedidoRapido é uma plataforma de gerenciamento que permite:
 
 
 ## 🔧 Instalação e Configuração
+## 🔧 Instalação e Configuração
 
 Node.js 18+
 MongoDB (local ou MongoDB Atlas)
 npm ou yarn
+
 
 
 
@@ -89,6 +105,7 @@ Frontend rodando em: http://localhost:3000
 
 ```
 
+## 📚 Documentação Completa
 ## 📚 Documentação Completa
 Backend API
 Estrutura da API
@@ -219,12 +236,14 @@ Garcom (1) → (N) Pedidos
 ``` 
 
 ## Visualizar Dados
+## Visualizar Dados
 Use o Prisma Studio para visualizar e editar dados:
 
 cd backend
 npx prisma studio
 Abre em: http://localhost:5555
 
+## 🔐 Segurança
 ## 🔐 Segurança
 
 **✅ Hash de senhas com bcrypt**
@@ -235,6 +254,7 @@ Abre em: http://localhost:5555
 **✅ Variáveis de ambiente para secrets**
 
 
+## 🐛 Troubleshooting
 ## 🐛 Troubleshooting
 
 ### Erro de conexão com MongoDB  
@@ -266,6 +286,7 @@ curl http://localhost:3000/
 ### Registrar Admin:
 
 ```bash
+```bash
 curl -X POST http://localhost:3000/auth/cliente/register \
   -H "Content-Type: application/json" \
   -d '{
@@ -281,6 +302,7 @@ curl -X POST http://localhost:3000/auth/cliente/register \
 ```
   ### Registrar Cliente:
 
+```bash
 ```bash
   curl -X POST http://localhost:3000/auth/cliente/register \
   -H "Content-Type: application/json" \
