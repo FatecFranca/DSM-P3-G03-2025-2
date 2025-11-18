@@ -455,14 +455,7 @@ export default function MesasPage() {
               <p className="text-sm text-muted-foreground">
                 Esta ação não pode ser desfeita.
               </p>
-              {mesaToDelete && (
-                <div className="mt-4 p-3 bg-muted rounded-md space-y-1 text-sm">
-                  <p>• Status: <Badge className={getStatusColor(mesaToDelete.status)}>{mesaToDelete.status}</Badge></p>
-                  <p>• Clientes: {mesaToDelete.clientes.length}</p>
-                  <p>• Pedidos: {mesaToDelete.pedidos.length}</p>
-                  <p>• Total: {formatCurrency(mesaToDelete.valorTotal)}</p>
-                </div>
-              )}
+              
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
