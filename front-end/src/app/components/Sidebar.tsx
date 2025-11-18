@@ -33,7 +33,6 @@ export function Sidebar() {
   const pathname = usePathname();
 
   const navItems: NavItem[] = [
-    // Rotas exclusivas do Admin
     { name: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" />, href: '/admin/dashboard', adminOnly: true },
     { name: 'Mesas', icon: <UtensilsCrossed className="h-5 w-5" />, href: '/admin/mesas', adminOnly: true },
     { name: 'Pedidos', icon: <ShoppingCart className="h-5 w-5" />, href: '/admin/pedidos', adminOnly: true },
@@ -43,20 +42,13 @@ export function Sidebar() {
     { name: 'Clientes', icon: <Users className="h-5 w-5" />, href: '/admin/clientes', adminOnly: true },
     { name: 'Garçons', icon: <UserCog className="h-5 w-5" />, href: '/admin/garcons', adminOnly: true },
     { name: 'Relatórios', icon: <BarChart3 className="h-5 w-5" />, href: '/admin/relatorios', adminOnly: true },
-
-    // Rotas exclusivas do Garçom
     { name: 'Mesas', icon: <UtensilsCrossed className="h-5 w-5" />, href: '/garcom/mesas', garcomOnly: true },
     { name: 'Pedidos', icon: <ShoppingCart className="h-5 w-5" />, href: '/garcom/pedidos', garcomOnly: true },
   ];
 
   const filteredItems = navItems.filter((item) => {
-    // Se é adminOnly, só admin pode ver
     if (item.adminOnly) return isAdmin;
-    
-    // Se é garcomOnly, só garçom pode ver
     if (item.garcomOnly) return isGarcom;
-    
-    // Se não tem restrição, todos autenticados veem
     return true;
   });
 
@@ -67,7 +59,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'fixed left-0 top-16 z-30 h-[calc(100vh-4rem)] border-r bg-sidebar transition-all duration-300',
+        'fixed left-0 top-16 z-30 h-[calc(100vh-4rem)] glass-sidebar transition-all duration-300', // AQUI: glass-sidebar
         collapsed ? 'w-16' : 'w-64'
       )}
     >
@@ -81,8 +73,8 @@ export function Sidebar() {
                 className={cn(
                   'flex w-full items-center gap-3 rounded-lg px-3 py-2 transition-colors',
                   pathname === item.href
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    ? 'bg-primary/10 text-primary font-medium' // Mudança para usar Primary (laranja)
+                    : 'text-muted-foreground hover:bg-primary/5 hover:text-primary'
                 )}
               >
                 {item.icon}
@@ -92,17 +84,17 @@ export function Sidebar() {
           </nav>
         </div>
 
-        <div className="border-t p-3">
+        <div className="border-t border-orange-200/30 p-3">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setCollapsed(!collapsed)}
-            className="w-full"
+            className="w-full hover:bg-primary/5"
           >
             {collapsed ? (
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
             ) : (
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5 text-muted-foreground" />
             )}
           </Button>
         </div>

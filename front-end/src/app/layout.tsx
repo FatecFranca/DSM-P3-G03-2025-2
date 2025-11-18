@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 // @ts-ignore
 import "@/src/app/styles/globals.css";
 import Providers from "@/src/app/(public)/providers";
+import { BackgroundBlobs } from "@/src/app/components/BackgroundBlobs";
+import { Toaster } from "@/src/app/components/ui/sonner";
 
 export const metadata: Metadata = {
-  title: "Sistema de Gerenciamento de Mesas",
+  // MUDANÇA AQUI
+  title: "PedidoRapido - Gestão Inteligente",
   description: "Sistema de gerenciamento de mesas e pedidos",
 };
 
@@ -15,9 +18,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body>
+      <body className="antialiased">
         <Providers>
-          {children}
+          <BackgroundBlobs />
+          <main className="relative z-10">
+            {children}
+          </main>
+          <Toaster />
         </Providers>
       </body>
     </html>

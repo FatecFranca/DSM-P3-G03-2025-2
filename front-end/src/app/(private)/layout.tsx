@@ -15,36 +15,29 @@ export default function PrivateLayout({
   const router = useRouter();
   const { user, isAuthenticated, loading } = useAuth();
   
-  // Redireciona se não estiver autenticado (após carregar)
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      console.log('🚫 Não autenticado, redirecionando para /sign-in')
       router.push('/sign-in');
     }
   }, [loading, isAuthenticated, router]);
   
-  // Verifica o tipo de rota
   const isAdminRoute = pathname?.startsWith('/admin');
   const isClienteRoute = pathname?.startsWith('/cliente');
   const isGarcomRoute = pathname?.startsWith('/garcom');
   
-  // Proteção de rota - verifica se o usuário tem permissão
   useEffect(() => {
     if (!loading && user) {
       if (isAdminRoute && user.role !== 'admin') {
-        console.log('🚫 Usuário não é admin, redirecionando')
         router.push('/cliente/select-mesa');
       } else if (isGarcomRoute && user.role !== 'garcom') {
-        console.log('🚫 Usuário não é garçom, redirecionando')
         router.push('/cliente/select-mesa');
       }
     }
   }, [loading, user, isAdminRoute, isGarcomRoute, router]);
   
-  // Mostrar loading enquanto verifica autenticação
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Carregando...</p>
@@ -53,10 +46,10 @@ export default function PrivateLayout({
     );
   }
   
-  // Layout para Cliente
+  // Layout para Cliente (sem sidebar)
   if (isClienteRoute) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         {children}
       </div>
     );
@@ -65,7 +58,7 @@ export default function PrivateLayout({
   // Layout para Admin e Garçom (com Header e Sidebar)
   if (isAdminRoute || isGarcomRoute) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Header />
         <div className="flex">
           <Sidebar />
@@ -77,9 +70,8 @@ export default function PrivateLayout({
     );
   }
   
-  // Fallback
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {children}
     </div>
   );
