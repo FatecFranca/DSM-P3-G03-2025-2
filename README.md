@@ -1,43 +1,48 @@
 # DSM-P3-G03-2025-2
 Repositório do GRUPO 03 do Projeto Interdisciplinar do 3º semestre DSM 2025/2. Alunos: André Coral Rodrigues, Bruno José Rodrigues da Silva,  Guilherme de Araújo Silva.
 
-📋 Sobre o Projeto
+# 📋 Sobre o Projeto
+
 PedidoRapido é uma plataforma de gerenciamento que permite:
 
-🗂️ Cadastro e gestão do estabelecimento e clientes
-🛍️ Venda e gerenciamento de produtos 
-📊 Gerenciamento de estoque
-🪑  Gerenciamento de mesas
-👥 Sistema de clientes e pedidos
-🏭 Controle de fornecedores
-
-Backend
-Node.js + Express.js - API REST
-Prisma ORM - Gerenciamento de banco de dados
-MongoDB - Banco de dados NoSQL
-JWT - Autenticação
-Bcrypt - Hash de senhas
-
-Frontend
-Next.js 16 - Framework React
-React 19 - Biblioteca UI
-TypeScript - Tipagem estática
-Tailwind CSS - Estilização
-
-📁 Estrutura do Projeto
+-   🗂️ Cadastro e gestão do estabelecimento e clientes
+-   🛍️ Venda e gerenciamento de produtos
+-   📊 Gerenciamento de estoque
+-   🪑 Gerenciamento de mesas
+-   👥 Sistema de clientes e pedidos
+-   🏭 Controle de fornecedores
 
 
+## 🛠️ Backend
+
+-   Node.js + Express.js - API REST
+-   Prisma ORM - Gerenciamento de banco de dados
+-   MongoDB - Banco de dados NoSQL
+-   JWT - Autenticação
+-   Bcrypt - Hash de senhas
+
+## 🎨 Frontend
+
+-   Next.js 16 - Framework React
+-   React 19 - Biblioteca UI
+-   TypeScript - Tipagem estática
+-   Tailwind CSS - Estilização
 
 
-🔧 Instalação e Configuração
+## 📁 Estrutura do Projeto
+
+
+
+
+## 🔧 Instalação e Configuração
 
 Node.js 18+
 MongoDB (local ou MongoDB Atlas)
 npm ou yarn
 
-1. Clone o Repositório
 
-#### 1. Clone o repositório
+
+### 1. Clone o repositório
 ```bash
 git clone https://github.com/FatecFranca/DSM-P3-G03-2025-2.git
 cd DSM-P3-G03-2025-2    
@@ -45,7 +50,7 @@ cd DSM-P3-G03-2025-2
 
 
 
-2. Configure o Backend
+### 2. Configure o Backend
 
 ```bash
 cd backend
@@ -65,9 +70,10 @@ npx prisma generate
 npm run dev
 Backend rodando em: http://localhost:8080
 ```
+### 3. Configure o Frontend
 
 ```bash
-3. Configure o Frontend
+
 cd frontend
 
 # Instale as dependências
@@ -83,7 +89,7 @@ Frontend rodando em: http://localhost:3000
 
 ```
 
-📚 Documentação Completa
+## 📚 Documentação Completa
 Backend API
 Estrutura da API
 A API segue o padrão MVC + Service/Route:
@@ -92,16 +98,16 @@ Routes: Definem endpoints e aplicam middlewares
 Controllers: Lidam com requisições HTTP
 Models: Definidos no Prisma schema
 
-### CLIENTE
+## CLIENTE
 
-AUTENTICAÇÃO
+### AUTENTICAÇÃO
 ````bash
 POST   /clientes/register      # Registrar cliente
 POST   /clientes/login         # Login de cliente
 GET    /clientes/verify        # Verificar token do cliente (JWT)
 ````
 
-CRUD
+### CRUD
 ````bash
 POST   /clientes              # Criar cliente
 GET    /clientes              # Listar clientes
@@ -110,7 +116,7 @@ PUT    /clientes/:id          # Atualizar cliente
 DELETE /clientes/:id          # Deletar cliente
 
 ````
-### CATEGORIA
+## CATEGORIA
 
 ```bash
 POST   /categorias            # Criar categoria
@@ -120,14 +126,14 @@ PUT    /categorias/:id        # Atualizar categoria
 DELETE /categorias/:id        # Deletar categoria
 ```
 
-### GARCOM
+## GARCOM
 
- AUTENTICAÇÃO
+ ### AUTENTICAÇÃO
 ```bash
 POST   /garcons/login         # Login de garçom
 
 ```
- CRUD
+ ### CRUD
 ```bash
 POST   /garcons               # Criar garçom
 GET    /garcons               # Listar garçons
@@ -136,7 +142,7 @@ PUT    /garcons/:id           # Atualizar garçom
 DELETE /garcons/:id           # Deletar garçom
 ```
 
-### MESAS
+## MESAS
 ```bash
 POST   /mesas                 # Criar mesa
 GET    /mesas                 # Listar mesas
@@ -148,9 +154,9 @@ POST   /mesas/:id/sair        # Cliente sair da mesa (JWT)
 ```
 
 
-### PEDIDOS
+## PEDIDOS
 
- CRUD 
+ ### CRUD 
 ```bash
 POST   /pedidos               # Criar pedido
 GET    /pedidos               # Listar pedidos
@@ -159,7 +165,7 @@ PUT    /pedidos/:id           # Atualizar pedido
 DELETE /pedidos/:id           # Deletar pedido
 ```
 
-### ITEM PEDIDO
+## ITEM PEDIDO
 
 ```bash
 POST   /pedidos/:id/itens                 # Criar item
@@ -170,7 +176,7 @@ DELETE /pedidos/:id/itens/:itemId         # Deletar item
 
 ```
 
-### PRODUTOS
+## PRODUTOS
 
 ```bash
 POST   /produtos               # Criar produto
@@ -181,14 +187,14 @@ DELETE /produtos/:id           # Deletar produto
 
 ```
 
-### Tipos de Usuário
-Admin: Pode gerenciar produtos, clientes, garcons, mesas e pedidos.
-Cliente: Pode entrar escolher uma mesa do sistema, fazer pedidos
+## Tipos de Usuário
+**Admin:** Pode gerenciar produtos, clientes, garcons, mesas e pedidos.
+**Cliente:** Pode entrar escolher uma mesa do sistema, fazer pedidos
 e gerenciar seu perfil.
-Garcom: Pode gerenciar mesas e pedidos.
+**Garcom:** Pode gerenciar mesas e pedidos.
 
 
-### Parâmetros de Include Suportados
+## Parâmetros de Include Suportados
 
 - **Mesas**: `?include=cliente` ou `?include=clientes`
 - **Pedidos**: `?include=mesa`, `?include=garcom`, `?include=itens`
@@ -198,7 +204,7 @@ Garcom: Pode gerenciar mesas e pedidos.
 - **Garçons**: `?include=pedidos`
 
 
-### RELACIONAMENTOS 
+## RELACIONAMENTOS 
 
 ```bash
 
@@ -212,52 +218,54 @@ Garcom (1) → (N) Pedidos
 
 ``` 
 
-Visualizar Dados
+## Visualizar Dados
 Use o Prisma Studio para visualizar e editar dados:
 
 cd backend
 npx prisma studio
 Abre em: http://localhost:5555
 
-🔐 Segurança
+## 🔐 Segurança
 
-✅ Hash de senhas com bcrypt
-✅ Autenticação baseada em JWT
-✅ Controle de acesso baseado em roles
-✅ Rotas protegidas com middleware de autenticação
-✅ Configuração de CORS
-✅ Variáveis de ambiente para secrets
+**✅ Hash de senhas com bcrypt**
+**✅ Autenticação baseada em JWT**
+**✅ Controle de acesso baseado em roles**
+**✅ Rotas protegidas com middleware de autenticação**
+**✅ Configuração de CORS**
+**✅ Variáveis de ambiente para secrets**
 
 
-🐛 Troubleshooting
+## 🐛 Troubleshooting
 
-Erro de conexão com MongoDB
-Erro: "Can't reach database server"
+### Erro de conexão com MongoDB  
+**Erro:** `"Can't reach database server"`  
 
-Soluções:
+#### Soluções:
+**1. Verifique se o MongoDB está rodando.** 
+**2. Confirme a variável **DATABASE_URL** no arquivo** `.env`.  
+**3. Para MongoDB Atlas, verifique o *Network Access*** (liberar `0.0.0.0/0`).  
+**4. Teste a connection string localmente.**  
 
-1-Verifique se o MongoDB está rodando
-2-Confirme a DATABASE_URL no .env
-3-Para MongoDB Atlas, verifique network access (whitelist 0.0.0.0/0)
-4-Teste a connection string localmente
 
-Prisma Client não encontrado
-Erro: "Cannot find module '@prisma/client'"
+### Prisma Client não encontrado  
+**Erro:** `"Cannot find module '@prisma/client'"`
 
-Solução:
-
+#### Solução:
+```bash
 cd backend
 npx prisma generate
 
 
-🧪 Testes
+
+## 🧪 Testes
 Testar API Backend
 Health Check:
 
 curl http://localhost:3000/
 
-Registrar Admin:
+### Registrar Admin:
 
+```bash
 curl -X POST http://localhost:3000/auth/cliente/register \
   -H "Content-Type: application/json" \
   -d '{
@@ -270,9 +278,10 @@ curl -X POST http://localhost:3000/auth/cliente/register \
     "celular": "16555554444",
     "mesa_id": null
   }'
+```
+  ### Registrar Cliente:
 
-  Registrar Cliente:
-
+```bash
   curl -X POST http://localhost:3000/auth/cliente/register \
   -H "Content-Type: application/json" \
   -d '{
@@ -285,34 +294,43 @@ curl -X POST http://localhost:3000/auth/cliente/register \
     "celular": "16555554444",
     "mesa_id": null
   }'
+```
+### Testar Frontend
 
-Testar Frontend
-Acesse http://localhost:3000
-Vá para /auth/register e crie uma conta
-Faça login em /auth
-Navegue pela aplicação
+**Acesse:** `http://localhost:3000`  
 
-📖 Recursos Adicionais
-Ferramentas Recomendadas
-Postman/Insomnia - Testar API
-MongoDB Compass - GUI para MongoDB local
--VS Code Extensions:
--Prisma
--ESLint
+Vá para **/auth/register** e crie uma conta.  
+
+Faça login em **/auth**.  
+
+Navegue pela aplicação.  
 
 
-Links Úteis
--Documentação do Express
--Documentação do Prisma
--Documentação do Next.js
--MongoDB Atlas
+## 📖 Recursos Adicionais
+
+### Ferramentas Recomendadas
+**- Postman / Insomnia — Testar API**  
+**- MongoDB Compass — GUI para MongoDB local**  
+**- VS Code Extensions:** 
+  **- Prisma**  
+  **- ESLint**  
 
 
-💻Equipe
-GRUPO 03 - DSM 3º Semestre 2025/2
+### 🔗 Links Úteis
+- Documentação do Express  
+- Documentação do Prisma  
+- Documentação do Next.js  
+- MongoDB Atlas  
 
-André Coral Rodrigues
-Bruno José
-Guilherme De Araujo Silva
 
-Instituição: FATEC Franca Curso: Desenvolvimento de Software Multiplataforma Semestre: 3º - 2025/2
+## 💻 Equipe
+
+**GRUPO 03 - DSM 3º Semestre 2025/2**
+
+- André Coral Rodrigues  
+- Bruno José  
+- Guilherme de Araújo Silva  
+
+**Instituição:** FATEC Franca  
+**Curso:** Desenvolvimento de Software Multiplataforma  
+**Semestre:** 3º - 2025/2  
