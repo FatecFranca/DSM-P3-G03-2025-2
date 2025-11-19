@@ -21,6 +21,7 @@ PedidoRapido é uma plataforma de gerenciamento que permite:
 -   **JWT** - Autenticação
 -   **Bcrypt** - Hash de senhas
 -   **JavaScript** Linguagem utilizada
+-   **Cors** - Controle de requisições
 
 
 ## 🎨 Frontend
@@ -29,6 +30,8 @@ PedidoRapido é uma plataforma de gerenciamento que permite:
 -  **React 19** - Biblioteca UI
 -  **TypeScript** - Tipagem estática
 -  **Tailwind CSS** - Estilização
+-  **Axios** - Requisições HTTP
+-  **jspdf** - Converter as informações em PDF
 
 
 ## 📁 Estrutura do Projeto
