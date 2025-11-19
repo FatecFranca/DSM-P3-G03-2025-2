@@ -438,7 +438,7 @@ export default function PedidoMesaPage() {
                 size="sm"
                 onClick={handleLeaveMesa}
                 disabled={leaving}
-                className="shrink-0 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                className="shrink-0 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:shadow-md hover:shadow-orange-300/40"
               >
                 {leaving ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -465,7 +465,8 @@ export default function PedidoMesaPage() {
                 </CardDescription>
               </div>
               {carrinho.length > 0 && (
-                <div className="flex items-center gap-3 bg-white/50 rounded-xl px-4 py-2.5 shadow-sm border border-orange-200 backdrop-blur-sm">
+                <div className="flex items-center gap-3 bg-white/50 rounded-xl px-4 py-2.5 shadow-sm
+                 border border-orange-200 backdrop-blur-sm">
                   <Badge
                     variant="secondary"
                     className="text-base px-3 py-1.5 bg-orange-100 text-orange-800 hover:bg-orange-200"
@@ -500,13 +501,19 @@ export default function PedidoMesaPage() {
                     placeholder="Buscar produtos..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 sm:pl-12 h-10 sm:h-11 bg-white/50 border-orange-200 focus:border-primary focus:ring-primary text-foreground placeholder:text-muted-foreground/70"
+                    className="pl-10 sm:pl-12 h-10 sm:h-11 bg-white/50 border-orange-200 
+                      focus:border-primary focus:ring-primary text-foreground 
+                      placeholder:text-muted-foreground/70
+                      hover:shadow-md hover:shadow-orange-300/40 transition-all"
                   />
                 </div>
                 <select
                   value={ordenacao}
                   onChange={(e) => setOrdenacao(e.target.value as any)}
-                  className="px-3 py-2 border border-orange-200 rounded-lg bg-white/50 text-sm sm:text-base font-medium w-full sm:w-auto sm:min-w-[160px] h-10 sm:h-11 cursor-pointer hover:bg-orange-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground"
+                  className="px-3 py-2 border border-orange-200 rounded-lg bg-white/50 text-sm sm:text-base
+                   font-medium w-full sm:w-auto sm:min-w-[160px] h-10 sm:h-11 cursor-pointer hover:bg-orange-50
+                    transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground
+                    hover:shadow-md hover:shadow-orange-300/40"
                 >
                   <option value="nome">📝 Nome A-Z</option>
                   <option value="preco_asc">💰 Menor Preço</option>
@@ -520,10 +527,12 @@ export default function PedidoMesaPage() {
                 className="w-full"
               >
                 <ScrollArea className="w-full whitespace-nowrap pb-2">
-                  <TabsList className="inline-flex w-auto h-auto p-1 bg-white/40 rounded-xl border border-orange-100">
+                  <TabsList className="inline-flex w-auto h-auto p-1 bg-white/40 rounded-xl border border-orange-100 ">
                     <TabsTrigger
                       value="todos"
-                      className="flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all"
+                      className="flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm
+                       font-medium data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg
+                        transition-all"
                     >
                       <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span>Todos</span>
@@ -565,7 +574,9 @@ export default function PedidoMesaPage() {
                     return (
                       <Card
                         key={produto.id}
-                        className="overflow-hidden hover:shadow-lg transition-all duration-300 border border-orange-200 bg-white/80 backdrop-blur-sm group flex flex-col"
+                        className="overflow-hidden hover:shadow-lg transition-all duration-300
+                         border border-orange-200 bg-white/80 backdrop-blur-sm group flex flex-col
+                         "
                       >
                         <div className="relative aspect-[4/3] bg-orange-50 overflow-hidden">
                           {produto.imagem ? (
@@ -716,7 +727,8 @@ export default function PedidoMesaPage() {
                 {pedidos.map((pedido) => (
                   <div
                     key={pedido.id}
-                    className="bg-white/60 border border-orange-100 rounded-lg p-4 shadow-sm hover:shadow-md transition-all"
+                    className="bg-white/60 border border-orange-300/50 rounded-lg p-4 
+                    shadow-sm hover:shadow-md transition-all hover:shadow-md hover:shadow-orange-300/40"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>

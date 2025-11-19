@@ -73,20 +73,26 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-transparent p-4 relative overflow-hidden4">
+      <Card className="w-full max-w-md bg-white/70 backdrop-blur-xl border border-orange-300/50 shadow-2xl hover:shadow-orange-300/70 transition-transform hover:scale-101">
         <CardHeader className="space-y-1 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary">
-            <UtensilsCrossed className="h-8 w-8 text-primary-foreground" />
+            <UtensilsCrossed className="h-8 w-8 text-orange-300" />
           </div>
-          <CardTitle>Criar Conta</CardTitle>
+          <CardTitle
+            className="text-2xl font-bold text-black"
+            style={{ textShadow: "2px 2px 6px rgba(253, 186, 116, 0.8)" }}>
+              Criar Conta!
+          </CardTitle>
           <CardDescription>Preencha seus dados para começar</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="nome">Nome Completo *</Label>
+              <Label htmlFor="nome" className="space-y-2 text-gray-700 font-bold "
+                style={{ textShadow: "2px 2px 6px rgba(253, 186, 116, 0.8)" }} >Nome Completo *</Label>
               <Input
+                className='bg-white/50 border-orange-300/60 focus:border-primary focus:ring-primary text-gray-900 shadow border hover:shadow-orange-300/80'
                 id="nome"
                 name="nome"
                 type="text"
@@ -99,9 +105,11 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
+              <Label htmlFor="email" className="space-y-2 text-gray-700 font-bold "
+                style={{ textShadow: "2px 2px 6px rgba(253, 186, 116, 0.8)" }}>Email *</Label>
               <Input
                 id="email"
+                className='bg-white/50 border-orange-300/60 focus:border-primary focus:ring-primary text-gray-900 shadow border hover:shadow-orange-300/80'
                 name="email"
                 type="email"
                 placeholder="seu@email.com"
@@ -113,9 +121,11 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="senha">Senha *</Label>
+              <Label htmlFor="senha" className="space-y-2 text-gray-700 font-bold "
+                style={{ textShadow: "2px 2px 6px rgba(253, 186, 116, 0.8)" }}>Senha *</Label>
               <Input
                 id="senha"
+                className='bg-white/50 border-orange-300/60 focus:border-primary focus:ring-primary text-gray-900 shadow border hover:shadow-orange-300/80'
                 name="senha"
                 type="password"
                 placeholder="Mínimo 6 caracteres"
@@ -128,9 +138,11 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmarSenha">Confirmar Senha *</Label>
+              <Label htmlFor="confirmarSenha" className="space-y-2 text-gray-700 font-bold "
+                style={{ textShadow: "2px 2px 6px rgba(253, 186, 116, 0.8)" }}>Confirmar Senha *</Label>
               <Input
                 id="confirmarSenha"
+                className='bg-white/50 border-orange-300/60 focus:border-primary focus:ring-primary text-gray-900 shadow border hover:shadow-orange-300/80'
                 name="confirmarSenha"
                 type="password"
                 placeholder="Digite a senha novamente"
@@ -142,9 +154,12 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cpf">CPF (opcional)</Label>
+              <Label htmlFor="cpf"className="space-y-2 text-gray-700 font-bold "
+                style={{ textShadow: "2px 2px 6px rgba(253, 186, 116, 0.8)" }}>CPF </Label>
               <Input
                 id="cpf"
+                className='bg-white/50 border-orange-300/60 focus:border-primary
+                 focus:ring-primary text-gray-900 shadow border hover:shadow-orange-300/80'
                 name="cpf"
                 type="text"
                 placeholder="000.000.000-00"
@@ -155,9 +170,12 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="celular">Celular (opcional)</Label>
+              <Label htmlFor="celular"className="space-y-2 text-gray-700 font-bold "
+                style={{ textShadow: "2px 2px 6px rgba(253, 186, 116, 0.8)" }}>Celular </Label>
               <Input
                 id="celular"
+                className='bg-white/50 border-orange-300/60 focus:border-primary focus:ring-primary text-gray-900
+                 shadow border hover:shadow-orange-300/80'
                 name="celular"
                 type="tel"
                 placeholder="(00) 00000-0000"
@@ -173,13 +191,17 @@ export default function RegisterPage() {
               </Alert>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit"  className="w-full font-bold text-orange-300 shadow-md transition-all
+              hover:bg-orange-300 hover:text-black hover:shadow-lg hover:shadow-orange-300/50
+               transition-transform hover:scale-101 " 
+             disabled={loading}>
               {loading ? 'Criando conta...' : 'Criar Conta'}
             </Button>
 
             <div className="text-center text-sm">
               <span className="text-muted-foreground">Já tem uma conta? </span>
-              <Link href="/sign-in" className="text-primary hover:underline font-medium">
+              <Link href="/sign-in" className="text-gray-700 font-bold hover:text-orange-300 hover:underline"
+              style={{ textShadow: "2px 2px 6px rgba(253, 186, 116, 0.8)" }}>
                 Fazer login
               </Link>
             </div>
