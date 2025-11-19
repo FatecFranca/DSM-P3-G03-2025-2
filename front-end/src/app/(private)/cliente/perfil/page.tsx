@@ -244,9 +244,14 @@ export default function PerfilPage() {
         
         <Header user={user} handleLogout={logout} />
       
-      <div>
-        <h1 className="text-3xl font-bold">Meu Perfil</h1>
-        <p className="text-muted-foreground">Gerencie suas informações pessoais e configurações</p>
+      <div className="pl-6 py-4 bg-white/60 backdrop-blur-sm rounded-2xl shadow-md border border-black/30">
+        <span className="inline-block px-3 py-1 text-sm font-semibold bg-primary text-primary-foreground rounded-full">
+          Meu Perfil
+        </span>
+
+        <p className="mt-2 text-muted-foreground">
+            Gerencie suas informações pessoais e configurações
+        </p>
       </div>
 
       <div/>
