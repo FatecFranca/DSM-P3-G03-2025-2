@@ -240,7 +240,7 @@ export default function PerfilPage() {
 
   return (
     <div className="space-y-6">
-      <div className="pl-6 py-4 bg-white/60 backdrop-blur-sm rounded-2xl shadow-md border border-black/30">
+      <div className="pl-6 py-4 bg-white/60 backdrop-blur-sm rounded-2xl shadow-md border border-gray">
         <span className="inline-block px-3 py-1 text-sm font-semibold bg-primary text-primary-foreground rounded-full">
           Meu Perfil
         </span>
