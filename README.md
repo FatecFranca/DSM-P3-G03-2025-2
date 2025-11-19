@@ -376,15 +376,15 @@ Navegue pela aplicação.
 - [MongoDB Atlas](https://www.mongodb.com/atlas/database)
 
 
-## 🚀 Elevator Pitch
-
- [🏆 Elavator Pitch](https://www.youtube.com) 
+###   [🚀 Elevator Pitch](https://www.youtube.com) 
 
 
 
-## 🥈 [Prototipo Baixa Fidelidade](www.figma.com)  (**Se for necessario**)
 
-## 🥇 [Prototipo Alta Fidelidade](www.figma.com)  (**Se for necessario**)
+
+#### 🥈 [Prototipo Baixa Fidelidade](www.figma.com)  (**Se for necessario**)
+
+#### 🥇 [Prototipo Alta Fidelidade](www.figma.com)  (**Se for necessario**)
 
 ## 💻 Equipe
 
