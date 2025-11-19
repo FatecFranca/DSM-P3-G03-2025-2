@@ -15,9 +15,9 @@ function includeRelations(query) {
     // relacionamentos informados onde há vírgula
     const relations = query.include.split(',')
 
-    // Preenche a const "include" com as relações informadas
+    
     for(let rel of relations) {
-      // Include de 2º nível (único caso nesta aplicação)
+      
       if(rel === 'itens.produto') {
         include.itens = {
           include: { produto: true }
