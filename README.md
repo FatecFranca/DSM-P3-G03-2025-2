@@ -37,10 +37,10 @@ DSM-P3-G03-2025-2/
 ├── backend/              # API Backend
 │   ├── src/
 │   │   ├── controllers/  # Controladores HTTP
-│   │   ├── database/     # Lógica de negócio
+│   │   ├── database/     # Configurações do banco
 │   │   ├── routes/       # Rotas da API
-│   │   ├── middlewares/  # Middlewares (auth, errors)
-│   │   └── lib/        # Utilitários
+│   │   ├── middlewares/  # Middlewares (auth)
+│   │   └── lib/          # Utilitários
 │   ├── prisma/
 │   │   └── schema.prisma # Esquema do banco de dados
 │   └── package.json
@@ -60,11 +60,11 @@ DSM-P3-G03-2025-2/
 │   ├── components/      # Componentes React
 │   ├── lib/            # API client e utilitários
 │   ├── contexts/       # Contextos de autenticação e thema
-│   ├── hooks/          # React hooks customizados
+│   ├── hooks/          # React hooks customizados (Atualmente não esta em uso)
 │   └── package.json
 │
 ├── docs/               # Documentação
-└── vercel.json        # Configuração Render
+└── vercel.json        # Configuração Vercel
     
 ```
 
