@@ -352,9 +352,13 @@ curl -X POST http://localhost:3000/auth/cliente/register \
 
 **Acesse:** `http://localhost:3000`  
 
-Vá para **/auth/register** e crie uma conta.  
+Vá para **/register** e crie uma conta.  
 
-Faça login em **/auth**.  
+- **Atualmente só é possivel criar Cliente admin:false (Cliente comum) pela pagina de registro**
+
+Faça login em **/sign-in**.
+
+
 
 Navegue pela aplicação.  
 
