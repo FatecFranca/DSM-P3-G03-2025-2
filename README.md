@@ -380,16 +380,23 @@ Navegue pela aplicação.
 - [MongoDB Atlas](https://www.mongodb.com/atlas/database)
 
 
-###   [🚀 Elevator Pitch](https://www.youtube.com) 
+###   *[🚀 Elevator Pitch](https://www.youtube.com)* 
 
 
 
 
 
-#### 🥈 [Prototipo Baixa Fidelidade](www.figma.com)  (**Se for necessario**)
+#### *🥈 [Prototipo Baixa Fidelidade](www.figma.com)*  (**Se for necessario**)
 
-#### 🥇 [Prototipo Alta Fidelidade](https://pedidorapido.vercel.app)  (**Faltando apenas o login funcional**)
+#### *🥇 [Prototipo Alta Fidelidade](https://pedidorapido.vercel.app)*
 
+### *Logins funcionais (Alta fidelidade):*
+
+```bash
+Cliente: teste@teste.com senha: 123456
+Admin: admin@admin.com senha: 123456
+Garcom: garcom@teste.com senha: 123456
+```
 ## 💻 Equipe
 
 **GRUPO 03 - DSM 3º Semestre 2025/2**
