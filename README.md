@@ -15,32 +15,65 @@ PedidoRapido é uma plataforma de gerenciamento que permite:
 
 ## 🛠️ Backend
 
--   Node.js + Express.js - API REST
--   Prisma ORM - Gerenciamento de banco de dados
--   MongoDB - Banco de dados NoSQL
--   JWT - Autenticação
--   Bcrypt - Hash de senhas
+-   **Node.js** + **Express.js** - API REST
+-   **Prisma ORM** - Gerenciamento de banco de dados
+-   **MongoDB** - Banco de dados NoSQL
+-   **JWT** - Autenticação
+-   **Bcrypt** - Hash de senhas
+-   **JavaScript** Linguagem utilizada
 
 
 ## 🎨 Frontend
 
--   Next.js 16 - Framework React
--   React 19 - Biblioteca UI
--   TypeScript - Tipagem estática
--   Tailwind CSS - Estilização
+-  **Next.js 16** - Framework React
+-  **React 19** - Biblioteca UI
+-  **TypeScript** - Tipagem estática
+-  **Tailwind CSS** - Estilização
 
 
 ## 📁 Estrutura do Projeto
-
-
-
+```bash
+DSM-P3-G03-2025-2/
+├── backend/              # API Backend
+│   ├── src/
+│   │   ├── controllers/  # Controladores HTTP
+│   │   ├── database/     # Lógica de negócio
+│   │   ├── routes/       # Rotas da API
+│   │   ├── middlewares/  # Middlewares (auth, errors)
+│   │   └── lib/        # Utilitários
+│   ├── prisma/
+│   │   └── schema.prisma # Esquema do banco de dados
+│   └── package.json
+│
+├── frontend/             # Frontend Next.js
+│   ├── app/  # Páginas e rotas  
+│   │   │ 
+│   │   ├── private/ # Rotas autenticadas 
+│   │   │        ├── admin/ # Rota admin
+│   │   │        ├── cliente/ # Rota cliente
+│   │   │        └── garcom/  # Rota garcom
+│   │   │ 
+│   │   └── public/  # Rotas sem autenticação 
+│   │           ├── register/ # Rota para registrar
+│   │           └── sign-in/  # Rota para logar
+│   │ 
+│   ├── components/      # Componentes React
+│   ├── lib/            # API client e utilitários
+│   ├── contexts/       # Contextos de autenticação e thema
+│   ├── hooks/          # React hooks customizados
+│   └── package.json
+│
+├── docs/               # Documentação
+└── vercel.json        # Configuração Render
+    
+```
 
 ## 🔧 Instalação e Configuração
 
 
-Node.js 18+
-MongoDB (local ou MongoDB Atlas)
-npm ou yarn
+- **Node.js 18+**
+- **MongoDB** (local ou MongoDB Atlas)
+- **npm** ou **yarn**
 
 
 
@@ -192,7 +225,7 @@ DELETE /produtos/:id           # Deletar produto
 ```
 
 ### Tipos de Usuário
-- **Admin:** Pode gerenciar produtos, clientes, garcons, mesas e pedidos.
+- **Admin:** Pode gerenciar produtos, clientes, garcons, mesas, pedidos, categorias e perfil.
 - **Cliente:** Pode entrar escolher uma mesa do sistema, fazer pedidos
 e gerenciar seu perfil.
 - **Garcom:** Pode gerenciar mesas e pedidos.
@@ -226,9 +259,18 @@ Garcom (1) → (N) Pedidos
 ## Visualizar Dados
 Use o Prisma Studio para visualizar e editar dados:
 
+```bash
 cd backend
 npx prisma studio
-Abre em: http://localhost:5555
+
+```
+Abre em:
+
+```bash
+ http://localhost:5555
+```
+
+
 
 
 ## 🔐 Segurança
@@ -261,15 +303,17 @@ Abre em: http://localhost:5555
 ```bash
 cd backend
 npx prisma generate
+```
 
 
 
 ## 🧪 Testes
 Testar API Backend
-Health Check:
 
+**Health Check:**
+```bash
 curl http://localhost:3000/
-
+```
 ### Registrar Admin:
 
 ```bash
@@ -326,11 +370,21 @@ Navegue pela aplicação.
 
 
 ### 🔗 Links Úteis
-- Documentação do Express  
-- Documentação do Prisma  
-- Documentação do Next.js  
-- MongoDB Atlas  
+- [Documentação do Express](https://expressjs.com/)
+- [Documentação do Prisma](https://www.prisma.io/docs)
+- [Documentação do Next.js](https://nextjs.org/docs)
+- [MongoDB Atlas](https://www.mongodb.com/atlas/database)
 
+
+## 🚀 Elevator Pitch
+
+ [🏆 Elavator Pitch](https://www.youtube.com) 
+
+
+
+## 🥈 [Prototipo Baixa Fidelidade](www.figma.com)  (**Se for necessario**)
+
+## 🥇 [Prototipo Alta Fidelidade](www.figma.com)  (**Se for necessario**)
 
 ## 💻 Equipe
 
