@@ -56,8 +56,8 @@ export default function SignInPage() {
       <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-amber-300/20 rounded-full blur-[100px] -z-10" />
 
       {/* CARD GLASS - Adicionei border-orange-300 explicitamente */}
-      <Card className="w-full max-w-md bg-white/70 backdrop-blur-xl border border-orange-300/50 shadow-2xl
-       hover:shadow-orange-300/80 transition-transform hover:scale-101">
+      <Card className="w-full max-w-md bg-white/70 backdrop-blur-xl border border-black/10 shadow-2xl
+       hover:shadow-orange-300/80 hover:border-orange-300/50 transition-transform hover:scale-101">
         <CardHeader className="space-y-1 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-lg shadow-orange-500/20">
             <UtensilsCrossed className="h-8 w-8 text-orange-300 " />
