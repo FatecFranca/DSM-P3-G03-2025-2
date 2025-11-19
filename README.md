@@ -384,7 +384,7 @@ Navegue pela aplicação.
 
 #### 🥈 [Prototipo Baixa Fidelidade](www.figma.com)  (**Se for necessario**)
 
-#### 🥇 [Prototipo Alta Fidelidade](www.figma.com)  (**Se for necessario**)
+#### 🥇 [Prototipo Alta Fidelidade](https://pedidorapido.vercel.app)  (**Faltando apenas o login funcional**)
 
 ## 💻 Equipe
 
