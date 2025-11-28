@@ -18,7 +18,7 @@ app.use(cors(corsOptions))
 // Middleware para parsing de JSON
 app.use(express.json())
 
-// Rotas
+// Rotas (As rotas estão em index.js)
 app.use(routes)
 
 // Rota de teste
