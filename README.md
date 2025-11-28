@@ -120,7 +120,7 @@ npm install
 
 # Configure as variáveis de ambiente
 cd lib 
-altereURL: const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'URL';
+altereURL: const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'URL'; e altere o .env
 
 # Inicie o servidor
 npm run dev
@@ -308,6 +308,11 @@ cd backend
 npx prisma generate
 ```
 
+### Erro de compilação no front-end
+```bash
+Ctrl + c 
+```
+- Apos isso inicie novamente o front-end
 
 
 ## 🧪 Testes
